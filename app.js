@@ -30,7 +30,6 @@ $("searchInput").addEventListener("input", (e) => {
   document.querySelectorAll(".asset-row").forEach(row => row.style.display = row.dataset.search.includes(q) ? "flex" : "none");
 });
 $("notifications").addEventListener("click", () => toast("No new notifications."));
-$("p2pInfo").addEventListener("click", () => toast("P2P quotes will be shown only when a permitted source supplies real offers and timestamps."));
 $("activityFilter").addEventListener("click", () => toast("Connect a supported wallet or exchange to display verified activity."));
 document.querySelectorAll("[data-note]").forEach(btn => btn.addEventListener("click", () => toast(btn.dataset.note)));
 document.querySelectorAll(".summary-card").forEach(btn => btn.addEventListener("click", () => {
