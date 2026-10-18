@@ -15,10 +15,12 @@ export default async function handler(req, res) {
     const rows = await upstream.json();
     const mapped = {};
     for (const row of rows) {
-      const symbol = row.symbol === "USDCUSDT" ? "USDT" : row.symbol.replace("USDT", "");
+      const isStablePair = row.symbol === "USDCUSDT";
+      const rawPrice = Number(row.lastPrice);
+      const symbol = isStablePair ? "USDT" : row.symbol.replace("USDT", "");
       mapped[symbol] = {
-        price: Number(row.lastPrice),
-        change24h: Number(row.priceChangePercent),
+        price: isStablePair && rawPrice > 0 ? 1 / rawPrice : rawPrice,
+        change24h: isStablePair ? -Number(row.priceChangePercent) : Number(row.priceChangePercent),
         sourceSymbol: row.symbol
       };
     }
@@ -27,7 +29,7 @@ export default async function handler(req, res) {
       fetchedAt: new Date().toISOString(),
       assets: mapped
     });
-  } catch (error) {
+  } catch {
     return res.status(502).json({ error: "Public market feed temporarily unavailable" });
   }
 }
