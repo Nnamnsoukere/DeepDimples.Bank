@@ -139,7 +139,14 @@ async function loadP2POffers() {
     if (!response.ok) throw new Error(payload.error || "P2P feed unavailable");
     container.replaceChildren();
     if (!payload.offers || !payload.offers.length) {
-      container.textContent = "No usable offers returned. The marketplace may be unavailable or its response format may have changed.";
+      const empty = document.createElement("p");
+      empty.className = "data-note";
+      empty.textContent = "No usable offers returned by the feed.";
+      const fallback = document.createElement("a");
+      fallback.href = "https://p2p.binance.com/en/trade/" + (side === "BUY" ? "buy" : "sell") + "?fiat=NGN&asset=" + encodeURIComponent(asset);
+      fallback.target = "_blank"; fallback.rel = "noopener noreferrer";
+      fallback.textContent = "View current offers on Binance P2P";
+      container.append(empty, fallback);
     } else {
       for (const offer of payload.offers) {
         const card = document.createElement("article");
@@ -170,8 +177,14 @@ async function loadP2POffers() {
     const time = payload.fetchedAt ? new Date(payload.fetchedAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "unknown";
     $("p2pStatus").textContent = payload.count + " offers returned · " + time + " · " + payload.source + ". Verify final price and limits on exchange.";
   } catch (error) {
-    container.textContent = "Live P2P offers are currently unavailable. No sample prices are shown.";
-    $("p2pStatus").textContent = "Could not load the public NGN P2P feed. Try again later.";
+    container.replaceChildren();
+    const fallback = document.createElement("a");
+    fallback.href = "https://p2p.binance.com/en/trade/" + (side === "BUY" ? "buy" : "sell") + "?fiat=NGN&asset=" + encodeURIComponent(asset);
+    fallback.target = "_blank";
+    fallback.rel = "noopener noreferrer";
+    fallback.textContent = "Open Binance P2P to view current " + asset + "/NGN offers";
+    container.append(fallback);
+    $("p2pStatus").textContent = "The comparison feed could not be verified. Open the exchange directly; no estimated or sample prices are displayed.";
   }
 }
 $("refreshP2P").addEventListener("click", loadP2POffers);
