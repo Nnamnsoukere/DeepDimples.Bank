@@ -103,6 +103,11 @@
     <section class="section-heading section-gap" id="services">
       <div><p class="eyebrow">YOUR SERVICES</p><h2>Manage your money</h2></div>
     </section>
+    <section class="connection-panel" id="connections">
+      <div class="connection-heading"><div><p class="eyebrow">ACCOUNT INTEGRATIONS</p><h3>Exchange connections</h3></div><button class="text-button" id="refreshConnections">Check status</button></div>
+      <p class="data-note">Read-only connections are planned first. This checks server configuration only; it does not test credentials or access balances.</p>
+      <div class="connection-list" id="connectionList" aria-live="polite"><p class="data-note">Checking configuration…</p></div>
+    </section>
     <section class="service-grid">
       <button class="service-card" data-note="Wallet connection is not active yet."><span>◈</span><b>Wallets</b><small>Connect and view assets</small></button>
       <button class="service-card" data-note="This preview does not issue debit cards."><span>▤</span><b>Debit cards</b><small>Provider connection needed</small></button>
