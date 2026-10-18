@@ -76,44 +76,54 @@ $("profileForm").addEventListener("submit", (e) => {
 
 // Public spot market ticker feed; no API key. These are market prices, not wallet balances or guaranteed trade prices.
 const marketAssets = [
-  {symbol:"BTC", pair:"BTCUSDT", name:"Bitcoin", search:"bitcoin btc"},
-  {symbol:"ETH", pair:"ETHUSDT", name:"Ethereum", search:"ethereum eth"},
-  {symbol:"SOL", pair:"SOLUSDT", name:"Solana", search:"solana sol"},
-  {symbol:"USDT", pair:"USDTUSDC", name:"Tether", search:"tether usdt"}
+  {symbol:"BTC", name:"Bitcoin", search:"bitcoin btc"},
+  {symbol:"ETH", name:"Ethereum", search:"ethereum eth"},
+  {symbol:"SOL", name:"Solana", search:"solana sol"},
+  {symbol:"USDT", name:"Tether", search:"tether usdt"}
 ];
 const money = (n) => "$" + Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:n < 1 ? 6 : 2});
 async function loadMarketPrices() {
   $("marketFreshness").textContent = "Updating public market feed…";
   $("priceStatus").textContent = "Fetching public spot market prices. Market prices are not wallet balances.";
-  let success = 0;
-  for (const asset of marketAssets) {
-    const row = document.querySelector('[data-search="' + asset.search + '"]');
-    try {
-      const response = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=" + asset.pair, {cache:"no-store"});
-      if (!response.ok) throw new Error("Market endpoint unavailable");
-      const data = await response.json();
-      const price = Number(data.lastPrice);
-      const change = Number(data.priceChangePercent);
-      if (!Number.isFinite(price)) throw new Error("Invalid price");
-      row.querySelector(".asset-price b").textContent = money(price);
+  try {
+    const response = await fetch("/api/market", {cache:"no-store"});
+    if (!response.ok) throw new Error("Market feed unavailable");
+    const payload = await response.json();
+    let success = 0;
+    for (const asset of marketAssets) {
+      const row = document.querySelector('[data-search="' + asset.search + '"]');
+      const quote = payload.assets && payload.assets[asset.symbol];
+      if (!quote || !Number.isFinite(Number(quote.price))) {
+        row.querySelector(".asset-price b").textContent = "Unavailable";
+        row.querySelector(".asset-price small").textContent = "Feed unavailable";
+        row.querySelector(".asset-change").textContent = "—";
+        continue;
+      }
+      row.querySelector(".asset-price b").textContent = money(quote.price);
       row.querySelector(".asset-price small").textContent = "24h spot market";
+      const change = Number(quote.change24h) || 0;
       const changeEl = row.querySelector(".asset-change");
       changeEl.textContent = (change >= 0 ? "+" : "") + change.toFixed(2) + "%";
       changeEl.className = "asset-change " + (change > 0 ? "positive" : change < 0 ? "negative" : "neutral");
       success++;
-    } catch {
+    }
+    const now = new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    $("marketSummary").textContent = success ? success + "/4 live" : "Feed unavailable";
+    $("marketFreshness").textContent = success ? "Updated " + now : "No market data";
+    $("priceStatus").textContent = success
+      ? "Source: " + (payload.source || "public spot market") + " · refreshed " + now + ". Prices are indicative, not executable quotes. No wallet is connected."
+      : "The market feed returned no valid prices. No prices have been fabricated.";
+  } catch {
+    $("marketSummary").textContent = "Feed unavailable";
+    $("marketFreshness").textContent = "Could not reach market feed";
+    $("priceStatus").textContent = "Public market data is temporarily unavailable. No prices have been fabricated; try Refresh again.";
+    document.querySelectorAll(".asset-row").forEach(row => {
       row.querySelector(".asset-price b").textContent = "Unavailable";
       row.querySelector(".asset-price small").textContent = "Feed unavailable";
       row.querySelector(".asset-change").textContent = "—";
-    }
+    });
   }
-  const now = new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  $("marketSummary").textContent = success ? success + "/4 live" : "Feed unavailable";
-  $("marketFreshness").textContent = success ? "Updated " + now : "Could not reach public market feed";
-  $("priceStatus").textContent = success
-    ? "Public spot market feed · refreshed " + now + ". USD-quoted prices are indicative and may differ from execution prices. No wallet is connected."
-    : "The public price feed could not be reached from this browser. No prices have been fabricated; try Refresh again.";
 }
 $("refreshPrices").addEventListener("click", loadMarketPrices);
-loadMarketPrices();
+
 setInterval(loadMarketPrices, 60000);
