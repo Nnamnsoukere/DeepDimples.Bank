@@ -12,10 +12,10 @@
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <div class="profile">
-      <div class="avatar" aria-hidden="true">DD</div>
-      <div><strong>DeepDimples</strong><span>Personal workspace</span></div>
-    </div>
+    <button class="profile profile-edit" id="editProfile" aria-label="Edit profile">
+      <div class="avatar" id="profileAvatar" aria-hidden="true">DD</div>
+      <div class="profile-copy"><strong id="profileName">DeepDimples</strong><span>Personal workspace · Edit profile</span></div>
+    </button>
     <div class="top-actions">
       <button class="icon-button" id="searchToggle" aria-label="Search">⌕</button>
       <button class="icon-button" id="notifications" aria-label="Notifications">♧</button>
@@ -118,7 +118,7 @@
     <button class="nav-item" data-nav="profile"><span>⚙</span><small>Settings</small></button>
   </nav>
 </div>
-<dialog id="profileDialog" class="profile-dialog"><form id="profileForm" method="dialog"><h2>Edit profile</h2><label for="nicknameInput">Nickname</label><input id="nicknameInput" maxlength="32" placeholder="Your nickname"><label for="avatarInput">Profile image URL (optional)</label><input id="avatarInput" type="url" placeholder="https://…"><div class="dialog-actions"><button type="button" class="outline-button" id="cancelProfile">Cancel</button><button type="submit" class="save-button">Save profile</button></div><p class="data-note">Profile details are saved only in this browser on this device.</p></form></dialog><div id="toast" role="status" aria-live="polite"></div>
+<dialog id="profileDialog" class="profile-dialog"><form id="profileForm" method="dialog"><h2>Edit profile</h2><label for="nicknameInput">Nickname</label><input id="nicknameInput" maxlength="32" placeholder="Your nickname"><label for="avatarInput">Profile image URL (optional)</label><input id="avatarInput" type="url" placeholder="https://…"><div class="dialog-actions"><button type="button" class="outline-button" id="cancelProfile">Cancel</button><button type="submit" class="save-button">Save profile</button></div><p class="data-note">Profile details are saved only in this browser on this device.</p></form></dialog><dialog id="profileDialog" class="profile-dialog"><form id="profileForm"><h2>Edit profile</h2><label for="nicknameInput">Nickname</label><input id="nicknameInput" maxlength="32" placeholder="Your nickname"><label for="avatarInput">Profile image URL (optional)</label><input id="avatarInput" type="url" placeholder="https://…"><div class="dialog-actions"><button type="button" class="outline-button" id="cancelProfile">Cancel</button><button type="submit" class="save-button">Save profile</button></div><p class="data-note">Profile details are saved only in this browser on this device.</p></form></dialog><div id="toast" role="status" aria-live="polite"></div>
 <script src="app.js"></script>
 </body>
 </html>
