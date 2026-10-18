@@ -1,19 +1,42 @@
-# DeepDimples Bank — visual refresh
+# DeepDimples Bank — personal crypto dashboard
 
-This is the refreshed static front-end for the DeepDimples Bank dashboard, styled to match the user's supplied black/charcoal mobile banking reference.
+A private, mobile-first personal crypto control panel deployed through GitHub and Vercel. It is **not a regulated bank** and does not custody funds.
 
-## Included
-- Responsive mobile-first dark banking interface
-- Black background, charcoal cards, white typography, restrained multicolour accents
-- Wallet overview with currency display selector (illustrative values only)
-- Search/filter interaction, hide-balance toggle, light/dark appearance toggle
-- Quick action cards, market watch layout, transaction empty state, NGN P2P panel
-- Bottom navigation and PWA manifest
+## Current implementation
+- Responsive dark-first dashboard with a light appearance option
+- Local nickname and profile-image preference
+- Public spot-market ticker via `/api/market` (no API key); prices are indicative market data, not executable quotes
+- NGN P2P offer lookup via `/api/p2p`, with a direct exchange link when live retrieval fails
+- Exchange configuration-status endpoint at `/api/connections`; it reports whether server environment variables exist, not whether credentials work
+- Baseline security response headers in `vercel.json`
 
-## Important limitations
-This is a front-end preview. It does **not** connect to a real bank account, wallet, exchange, card issuer, transfer, cash-out, live price feed, or P2P feed. Displayed wallet values are sample data. Do not treat them as funds held by the user.
+## Not yet connected
+- Authenticated wallet balances and transaction history
+- Exchange account balances and histories (OKX, Bybit, Bitget, Binance, MEXC)
+- Wallet signing, transfers, swaps, bank cash-outs, or card issuance
+- Confirmed multi-exchange P2P comparison
+- Live chat or voice
 
-No seed phrases, private keys, or API secrets should ever be added to these static files or committed to GitHub.
+Do not present disconnected features as working. The Vercel deployment marked Ready only means deployment completed successfully; runtime behavior must still be tested.
 
-## Deploy
-Upload `index.html`, `styles.css`, `app.js`, `manifest.json`, and `README.md` to the root of the existing GitHub repository. Vercel should redeploy automatically after the commit.
+## Exchange credential setup
+If you choose to connect exchange accounts, create **read-only** API keys only. Do not enable trading, withdrawals, transfers, or universal permissions. Store keys in Vercel Project Settings → Environment Variables, scoped to the intended environment; never paste them into chat, client-side JavaScript, or GitHub source. Use a separate key per exchange, restrict IPs if supported, and revoke a key immediately if exposed. Never enter a wallet recovery phrase into this app.
+
+Environment-variable names checked by `/api/connections`:
+- OKX: `OKX_API_KEY`, `OKX_API_SECRET`, `OKX_API_PASSPHRASE`
+- Bybit: `BYBIT_API_KEY`, `BYBIT_API_SECRET`
+- Bitget: `BITGET_API_KEY`, `BITGET_API_SECRET`, `BITGET_API_PASSPHRASE`
+- Binance: `BINANCE_API_KEY`, `BINANCE_API_SECRET`
+- MEXC: `MEXC_API_KEY`, `MEXC_API_SECRET`
+
+Presence of these variables does **not** mean an integration has been tested. Account endpoints must be implemented and validated before account information is shown.
+
+## Deployment
+The project is linked to Vercel through the GitHub repository. Commits to the default branch should trigger a deployment. Confirm deployment state and test the app and API endpoints after each change.
+
+## Safety principles
+- No seed phrases or private keys in the app or source repository.
+- Never fabricate balances, transaction history, market prices, or P2P offers.
+- Verify exchange API documentation and terms before using an endpoint.
+- Test with read-only access before enabling any financial action.
+- Real cash-outs and cards require an eligible external provider and any approvals it requires.
