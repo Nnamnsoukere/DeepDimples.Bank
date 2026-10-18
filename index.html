@@ -29,15 +29,15 @@
 
   <main>
     <section class="hero-row">
-      <div><p class="eyebrow">YOUR FINANCIAL SPACE</p><h1>Good to see you.</h1></div>
+      <div><p class="eyebrow">YOUR FINANCIAL SPACE</p><h1>DeepDimples Bank</h1></div>
       <span class="privacy-pill"><span class="dot"></span> Private</span>
     </section>
 
     <section class="wallet-card">
       <div class="wallet-card-top"><span>Wallet overview</span><button id="hideBalance" aria-label="Hide balance">◉</button></div>
-      <div class="wallet-value" id="walletValue">$12,640.54</div>
+      <div class="wallet-value" id="walletValue">Not connected</div>
       <div class="wallet-card-bottom">
-        <span id="walletSubtitle">Illustrative balance · not connected</span>
+        <span id="walletSubtitle">Connect a wallet to see real balances</span>
         <label class="currency-select-label" for="currency">Display
           <select id="currency" aria-label="Display currency">
             <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="NGN">NGN</option><option value="USDT">USDT</option><option value="USDC">USDC</option><option value="BTC">BTC</option><option value="HB">HB</option>
@@ -74,12 +74,12 @@
       <button class="text-button" id="refreshPrices">Refresh ↻</button>
     </section>
     <section class="asset-list" id="assetList">
-      <div class="asset-row" data-search="bitcoin btc"><span class="asset-icon btc">₿</span><div class="asset-info"><b>Bitcoin</b><small>BTC</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
-      <div class="asset-row" data-search="ethereum eth"><span class="asset-icon eth">◆</span><div class="asset-info"><b>Ethereum</b><small>ETH</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
-      <div class="asset-row" data-search="solana sol"><span class="asset-icon sol">◎</span><div class="asset-info"><b>Solana</b><small>SOL</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
-      <div class="asset-row" data-search="tether usdt"><span class="asset-icon usdt">₮</span><div class="asset-info"><b>Tether</b><small>USDT</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+      <div class="asset-row" data-search="bitcoin btc"><span class="asset-icon"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/btc.png" alt="Bitcoin logo"></span><div class="asset-info"><b>Bitcoin</b><small>BTC</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+      <div class="asset-row" data-search="ethereum eth"><span class="asset-icon"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/eth.png" alt="Ethereum logo"></span><div class="asset-info"><b>Ethereum</b><small>ETH</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+      <div class="asset-row" data-search="solana sol"><span class="asset-icon"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/sol.png" alt="Solana logo"></span><div class="asset-info"><b>Solana</b><small>SOL</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+      <div class="asset-row" data-search="tether usdt"><span class="asset-icon"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/usdt.png" alt="Tether logo"></span><div class="asset-info"><b>Tether</b><small>USDT</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
     </section>
-    <p class="data-note" id="priceStatus">Market prices are not connected in this build. The figures on the wallet card are illustrative, not real balances.</p>
+    <p class="data-note" id="priceStatus">Market feed loading. Prices are indicative market data, not executable quotes. Wallet balances remain disconnected until a wallet integration is enabled.</p>
 
     <section class="section-heading section-gap" id="activity">
       <div><p class="eyebrow">YOUR MONEY MOVES</p><h2>Recent activity</h2></div>
@@ -118,7 +118,7 @@
     <button class="nav-item" data-nav="profile"><span>⚙</span><small>Settings</small></button>
   </nav>
 </div>
-<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="profileDialog" class="profile-dialog"><form id="profileForm" method="dialog"><h2>Edit profile</h2><label for="nicknameInput">Nickname</label><input id="nicknameInput" maxlength="32" placeholder="Your nickname"><label for="avatarInput">Profile image URL (optional)</label><input id="avatarInput" type="url" placeholder="https://…"><div class="dialog-actions"><button type="button" class="outline-button" id="cancelProfile">Cancel</button><button type="submit" class="save-button">Save profile</button></div><p class="data-note">Profile details are saved only in this browser on this device.</p></form></dialog><div id="toast" role="status" aria-live="polite"></div>
 <script src="app.js"></script>
 </body>
 </html>
