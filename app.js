@@ -127,3 +127,55 @@ async function loadMarketPrices() {
 $("refreshPrices").addEventListener("click", loadMarketPrices);
 
 setInterval(loadMarketPrices, 60000);
+
+async function loadP2POffers() {
+  const asset = $("p2pAsset").value;
+  const side = $("p2pSide").value;
+  const container = $("p2pOffers");
+  $("p2pStatus").textContent = "Requesting public " + asset + "/NGN offers…";
+  container.textContent = "Loading offers…";
+  try {
+    const response = await fetch("/api/p2p?asset=" + encodeURIComponent(asset) + "&side=" + encodeURIComponent(side), {cache:"no-store"});
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "P2P feed unavailable");
+    container.replaceChildren();
+    if (!payload.offers || !payload.offers.length) {
+      container.textContent = "No usable offers returned. The marketplace may be unavailable or its response format may have changed.";
+    } else {
+      for (const offer of payload.offers) {
+        const card = document.createElement("article");
+        card.className = "p2p-offer";
+        const heading = document.createElement("div");
+        heading.className = "p2p-offer-top";
+        const trader = document.createElement("b");
+        trader.textContent = offer.trader || "Marketplace advertiser";
+        const price = document.createElement("strong");
+        price.textContent = "₦" + Number(offer.priceNGN).toLocaleString("en-NG",{maximumFractionDigits:2});
+        heading.append(trader, price);
+        const details = document.createElement("p");
+        const limits = offer.minNGN && offer.maxNGN
+          ? "Limits ₦" + Number(offer.minNGN).toLocaleString("en-NG") + "–₦" + Number(offer.maxNGN).toLocaleString("en-NG")
+          : "Limits not supplied by provider";
+        details.textContent = limits + (offer.paymentMethods?.length ? " · " + offer.paymentMethods.join(", ") : "");
+        card.append(heading, details);
+        if (offer.offerId) {
+          const link = document.createElement("a");
+          link.href = "https://p2p.binance.com/en/trade/" + (side === "BUY" ? "buy" : "sell") + "?fiat=NGN&asset=" + encodeURIComponent(asset);
+          link.target = "_blank"; link.rel = "noopener noreferrer";
+          link.textContent = "Verify on Binance";
+          card.append(link);
+        }
+        container.append(card);
+      }
+    }
+    const time = payload.fetchedAt ? new Date(payload.fetchedAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "unknown";
+    $("p2pStatus").textContent = payload.count + " offers returned · " + time + " · " + payload.source + ". Verify final price and limits on exchange.";
+  } catch (error) {
+    container.textContent = "Live P2P offers are currently unavailable. No sample prices are shown.";
+    $("p2pStatus").textContent = "Could not load the public NGN P2P feed. Try again later.";
+  }
+}
+$("refreshP2P").addEventListener("click", loadP2POffers);
+$("p2pAsset").addEventListener("change", () => { $("p2pStatus").textContent = "Asset changed. Refresh to load current offers."; });
+$("p2pSide").addEventListener("change", () => { $("p2pStatus").textContent = "Trade direction changed. Refresh to load current offers."; });
+$("p2pInfo").addEventListener("click", () => toast("Compare prices, minimum/maximum order limits and payment methods. Open the exchange offer to verify the advertiser, terms and price before paying. Never release crypto before confirming your bank payment."));
