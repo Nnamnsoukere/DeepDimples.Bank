@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="DeepDimples Bank personal crypto and finance dashboard">
+  <title>DeepDimples Bank</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="profile">
+      <div class="avatar" aria-hidden="true">DD</div>
+      <div><strong>DeepDimples</strong><span>Personal workspace</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-button" id="searchToggle" aria-label="Search">⌕</button>
+      <button class="icon-button" id="notifications" aria-label="Notifications">♧</button>
+      <button class="icon-button" id="themeToggle" aria-label="Toggle light mode">☼</button>
+    </div>
+  </header>
+
+  <div class="search-wrap hidden" id="searchWrap">
+    <input id="searchInput" type="search" placeholder="Search assets or activity…" aria-label="Search dashboard">
+  </div>
+
+  <main>
+    <section class="hero-row">
+      <div><p class="eyebrow">YOUR FINANCIAL SPACE</p><h1>Good to see you.</h1></div>
+      <span class="privacy-pill"><span class="dot"></span> Private</span>
+    </section>
+
+    <section class="wallet-card">
+      <div class="wallet-card-top"><span>Wallet overview</span><button id="hideBalance" aria-label="Hide balance">◉</button></div>
+      <div class="wallet-value" id="walletValue">$12,640.54</div>
+      <div class="wallet-card-bottom">
+        <span id="walletSubtitle">Illustrative balance · not connected</span>
+        <label class="currency-select-label" for="currency">Display
+          <select id="currency" aria-label="Display currency">
+            <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="NGN">NGN</option><option value="USDT">USDT</option><option value="USDC">USDC</option><option value="BTC">BTC</option><option value="HB">HB</option>
+          </select>
+        </label>
+      </div>
+      <div class="card-shine"></div>
+    </section>
+
+    <section class="summary-grid">
+      <button class="summary-card" data-target="activity">
+        <span class="summary-title">Activity</span>
+        <strong>—</strong>
+        <span class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <small>No verified account data</small>
+      </button>
+      <button class="summary-card" data-target="markets">
+        <span class="summary-title">Market watch</span>
+        <strong id="marketSummary">Prices pending</strong>
+        <span class="market-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <small id="marketFreshness">Live feed not connected</small>
+      </button>
+    </section>
+
+    <section class="quick-actions" aria-label="Quick actions">
+      <button class="quick-action" data-note="Connect a supported wallet first. No transfer has been started."><span class="quick-icon">↗</span><b>Send</b></button>
+      <button class="quick-action" data-note="Choose a wallet and network before generating a receive address."><span class="quick-icon">⌁</span><b>Receive</b></button>
+      <button class="quick-action" data-note="Cash-outs still happen through your eligible exchange or P2P provider. No cash-out was initiated."><span class="quick-icon">⇄</span><b>Cash out</b></button>
+      <button class="quick-action" data-note="No debit card is connected or issued through this preview."><span class="quick-icon">▤</span><b>Cards</b></button>
+    </section>
+
+    <section class="section-heading" id="markets">
+      <div><p class="eyebrow">MARKET WATCH</p><h2>Crypto assets</h2></div>
+      <button class="text-button" id="refreshPrices">Refresh ↻</button>
+    </section>
+    <section class="asset-list" id="assetList">
+      <div class="asset-row" data-search="bitcoin btc"><span class="asset-icon btc">₿</span><div class="asset-info"><b>Bitcoin</b><small>BTC</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+      <div class="asset-row" data-search="ethereum eth"><span class="asset-icon eth">◆</span><div class="asset-info"><b>Ethereum</b><small>ETH</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+      <div class="asset-row" data-search="solana sol"><span class="asset-icon sol">◎</span><div class="asset-info"><b>Solana</b><small>SOL</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+      <div class="asset-row" data-search="tether usdt"><span class="asset-icon usdt">₮</span><div class="asset-info"><b>Tether</b><small>USDT</small></div><div class="asset-price"><b>—</b><small>Waiting for data</small></div><span class="asset-change neutral">—</span></div>
+    </section>
+    <p class="data-note" id="priceStatus">Market prices are not connected in this build. The figures on the wallet card are illustrative, not real balances.</p>
+
+    <section class="section-heading section-gap" id="activity">
+      <div><p class="eyebrow">YOUR MONEY MOVES</p><h2>Recent activity</h2></div>
+      <button class="text-button" id="activityFilter">All activity⌄</button>
+    </section>
+    <section class="transaction-panel">
+      <div class="empty-state"><span class="empty-icon">⇄</span><b>No connected activity</b><p>Connect a wallet or supported account to display verified transactions here.</p></div>
+    </section>
+
+    <section class="section-heading section-gap" id="p2p">
+      <div><p class="eyebrow">NIGERIA MARKET</p><h2>NGN P2P rates</h2></div>
+      <span class="status-label">NOT CONNECTED</span>
+    </section>
+    <section class="p2p-panel">
+      <div class="p2p-symbol">₦</div>
+      <div><b>Compare real offers</b><p>Live NGN offers require a permitted source. We will not invent prices or show unverified quotes as live.</p></div>
+      <button class="outline-button" id="p2pInfo">How it works</button>
+    </section>
+
+    <section class="section-heading section-gap" id="services">
+      <div><p class="eyebrow">YOUR SERVICES</p><h2>Manage your money</h2></div>
+    </section>
+    <section class="service-grid">
+      <button class="service-card" data-note="Wallet connection is not active yet."><span>◈</span><b>Wallets</b><small>Connect and view assets</small></button>
+      <button class="service-card" data-note="This preview does not issue debit cards."><span>▤</span><b>Debit cards</b><small>Provider connection needed</small></button>
+      <button class="service-card" data-note="Conversion will be added after a supported provider is chosen."><span>⇄</span><b>Convert</b><small>Not connected</small></button>
+      <button class="service-card" data-note="This is a private dashboard preview. Live chat and voice are not connected."><span>◌</span><b>Help & chat</b><small>Coming in a later phase</small></button>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-item active" data-nav="home"><span>▣</span><small>Home</small></button>
+    <button class="nav-item" data-nav="markets"><span>▥</span><small>Markets</small></button>
+    <button class="nav-item" data-nav="activity"><span>⇄</span><small>Activity</small></button>
+    <button class="nav-item" data-nav="services"><span>▦</span><small>Services</small></button>
+    <button class="nav-item" data-nav="profile"><span>⚙</span><small>Settings</small></button>
+  </nav>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
