@@ -30,3 +30,13 @@ body.light .profile-dialog input{background:#f8f8f8;color:#111;border-color:#ddd
 .p2p-offer p{font-size:12px;color:var(--muted,#aaa);margin:8px 0}
 .p2p-offer a{font-size:12px;text-decoration:underline;color:inherit}
 @media(max-width:420px){.p2p-controls{align-items:stretch}.p2p-controls label{flex:1}.p2p-controls select{width:100%}.p2p-controls button{width:100%}}
+
+.connection-panel{margin-top:18px;border:1px solid var(--line,#292929);border-radius:18px;padding:16px;background:var(--card,#101010)}
+.connection-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.connection-heading h3{margin:4px 0 0;font-size:17px}
+.connection-list{display:grid;gap:8px;margin-top:12px}
+.connection-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--line,#292929);border-radius:12px}
+.connection-row b{font-size:13px}
+.connection-state{font-size:11px;color:#c2a46c;text-align:right}
+.connection-state.configured{color:#81c9a0}
+@media(max-width:420px){.connection-panel{padding:12px}.connection-row{align-items:flex-start;flex-direction:column;gap:5px}.connection-state{text-align:left}}
