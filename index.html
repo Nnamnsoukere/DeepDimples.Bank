@@ -93,10 +93,11 @@
       <div><p class="eyebrow">NIGERIA MARKET</p><h2>NGN P2P rates</h2></div>
       <span class="status-label">NOT CONNECTED</span>
     </section>
-    <section class="p2p-panel">
-      <div class="p2p-symbol">₦</div>
-      <div><b>Compare real offers</b><p>Live NGN offers require a permitted source. We will not invent prices or show unverified quotes as live.</p></div>
-      <button class="outline-button" id="p2pInfo">How it works</button>
+    <section class="p2p-panel p2p-panel-stack">
+      <div class="p2p-intro"><div class="p2p-symbol">₦</div><div><b>NGN marketplace offers</b><p>Public Binance P2P offers. Check limits and payment details on the exchange before trading.</p></div></div>
+      <div class="p2p-controls"><label>Asset<select id="p2pAsset"><option>USDT</option><option>USDC</option><option>BTC</option></select></label><label>I'm looking to<select id="p2pSide"><option value="BUY">Buy crypto</option><option value="SELL">Sell crypto</option></select></label><button class="outline-button" id="refreshP2P">Refresh offers</button></div>
+      <p class="data-note" id="p2pStatus">Offers have not been requested yet.</p><div class="p2p-offers" id="p2pOffers" aria-live="polite"><p class="data-note">Choose an asset and refresh to request public offers.</p></div>
+      <button class="text-button" id="p2pInfo">How to use P2P safely</button>
     </section>
 
     <section class="section-heading section-gap" id="services">
