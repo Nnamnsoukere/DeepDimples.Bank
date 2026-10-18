@@ -191,3 +191,32 @@ $("refreshP2P").addEventListener("click", loadP2POffers);
 $("p2pAsset").addEventListener("change", () => { $("p2pStatus").textContent = "Asset changed. Refresh to load current offers."; });
 $("p2pSide").addEventListener("change", () => { $("p2pStatus").textContent = "Trade direction changed. Refresh to load current offers."; });
 $("p2pInfo").addEventListener("click", () => toast("Compare prices, minimum/maximum order limits and payment methods. Open the exchange offer to verify the advertiser, terms and price before paying. Never release crypto before confirming your bank payment."));
+
+async function loadConnectionStatus() {
+  const list = $("connectionList");
+  list.replaceChildren();
+  const loading = document.createElement("p"); loading.className = "data-note"; loading.textContent = "Checking server configuration…"; list.append(loading);
+  try {
+    const response = await fetch("/api/connections", {cache:"no-store"});
+    if (!response.ok) throw new Error("Status endpoint unavailable");
+    const data = await response.json();
+    list.replaceChildren();
+    for (const provider of data.providers || []) {
+      const row = document.createElement("div"); row.className = "connection-row";
+      const name = document.createElement("b"); name.textContent = provider.name;
+      const status = document.createElement("span"); status.className = provider.configured ? "connection-state configured" : "connection-state";
+      status.textContent = provider.configured ? "Credentials configured · not verified" : "Not configured";
+      row.append(name, status); list.append(row);
+    }
+    const note = document.createElement("p"); note.className = "data-note";
+    note.textContent = "Checked " + new Date(data.checkedAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"}) + ". Configuration presence alone does not verify credentials or connect account data.";
+    list.append(note);
+  } catch {
+    list.replaceChildren();
+    const note = document.createElement("p"); note.className = "data-note";
+    note.textContent = "Connection status could not be loaded. The server status endpoint may still be deploying.";
+    list.append(note);
+  }
+}
+$("refreshConnections").addEventListener("click", loadConnectionStatus);
+loadConnectionStatus();
