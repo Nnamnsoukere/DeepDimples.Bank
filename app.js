@@ -5,7 +5,53 @@ const toast = (message) => {
 };
 
 // This front-end never invents wallet balances. Only a wallet/provider integration can supply them.
+
 let hiddenBalance = false;
+
+// Watch-only wallet address: public address only. Never ask for a seed phrase or private key.
+const WATCH_WALLET_KEY = "ddb-watch-wallet";
+function renderWatchWallet() {
+  let address = "";
+  try { address = localStorage.getItem(WATCH_WALLET_KEY) || ""; } catch {}
+  const state = $("walletConnectionState");
+  const subtitle = $("walletSubtitle");
+  const button = $("watchWallet");
+  if (address) {
+    state.textContent = "Watching address: " + address.slice(0, 7) + "…" + address.slice(-5);
+    subtitle.textContent = "Public address saved · balances not yet indexed";
+    button.textContent = "✎ Change public address";
+  } else {
+    state.textContent = "Watch-only · no signing or transfers";
+    subtitle.textContent = "No wallet connected · watch-only address support";
+    button.textContent = "＋ Add public wallet address";
+  }
+}
+$("watchWallet").addEventListener("click", () => {
+  let current = "";
+  try { current = localStorage.getItem(WATCH_WALLET_KEY) || ""; } catch {}
+  const answer = window.prompt("Enter a PUBLIC wallet address to save for watch-only tracking. Never enter a recovery phrase or private key.", current);
+  if (answer === null) return;
+  const address = answer.trim();
+  if (!address) {
+    try { localStorage.removeItem(WATCH_WALLET_KEY); } catch {}
+    renderWatchWallet();
+    toast("Watch-only address cleared from this browser.");
+    return;
+  }
+  if (address.length < 20 || address.length > 128 || /\\s/.test(address)) {
+    toast("That does not look like a valid public wallet address. Check it and try again.");
+    return;
+  }
+  try {
+    localStorage.setItem(WATCH_WALLET_KEY, address);
+    renderWatchWallet();
+    toast("Public address saved on this device. No funds were accessed or moved.");
+  } catch {
+    toast("Could not save the address in this browser.");
+  }
+});
+renderWatchWallet();
+
 $("currency").addEventListener("change", () => {
   $("walletValue").textContent = hiddenBalance ? "••••••••" : "Not connected";
   $("walletSubtitle").textContent = "Display preference only · wallet not connected";
