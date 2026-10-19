@@ -40,3 +40,6 @@ body.light .profile-dialog input{background:#f8f8f8;color:#111;border-color:#ddd
 .connection-state{font-size:11px;color:#c2a46c;text-align:right}
 .connection-state.configured{color:#81c9a0}
 @media(max-width:420px){.connection-panel{padding:12px}.connection-row{align-items:flex-start;flex-direction:column;gap:5px}.connection-state{text-align:left}}
+
+.asset-logo-fallback{width:27px;height:27px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#252525;color:#f5f5f5;font-size:9px;font-weight:750;letter-spacing:-.3px;flex:0 0 27px}
+body.light .asset-logo-fallback{background:#e7e7e7;color:#222}
