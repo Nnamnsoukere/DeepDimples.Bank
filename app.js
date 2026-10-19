@@ -93,13 +93,19 @@ const marketAssets = [
   {symbol:"USDT", name:"Tether", search:"tether usdt"}
 ];
 const money = (n) => "$" + Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:n < 1 ? 6 : 2});
+let marketRequestInFlight = false;
+let lastGoodMarketPayload = null;
 async function loadMarketPrices() {
+  if (marketRequestInFlight) return;
+  marketRequestInFlight = true;
   $("marketFreshness").textContent = "Updating public market feed…";
   $("priceStatus").textContent = "Fetching public spot market prices. Market prices are not wallet balances.";
   try {
     const response = await fetch("/api/market", {cache:"no-store"});
     if (!response.ok) throw new Error("Market feed unavailable");
     const payload = await response.json();
+    if (!payload.assets || !["BTC","ETH","SOL","USDT"].every(symbol => Number.isFinite(Number(payload.assets[symbol]?.price)) && Number(payload.assets[symbol].price) > 0)) throw new Error("Incomplete market data");
+    lastGoodMarketPayload = payload;
     let success = 0;
     for (const asset of marketAssets) {
       const row = document.querySelector('[data-search="' + asset.search + '"]');
@@ -125,18 +131,22 @@ async function loadMarketPrices() {
       ? "Source: " + (payload.source || "public spot market") + " · refreshed " + now + ". Prices are indicative, not executable quotes. No wallet is connected."
       : "The market feed returned no valid prices. No prices have been fabricated.";
   } catch {
-    $("marketSummary").textContent = "Feed unavailable";
-    $("marketFreshness").textContent = "Could not reach market feed";
-    $("priceStatus").textContent = "Public market data is temporarily unavailable. No prices have been fabricated; try Refresh again.";
-    document.querySelectorAll(".asset-row").forEach(row => {
+    $("marketSummary").textContent = lastGoodMarketPayload ? "Last known prices" : "Feed unavailable";
+    $("marketFreshness").textContent = lastGoodMarketPayload ? "Refresh failed · showing last successful prices" : "Could not reach market feed";
+    $("priceStatus").textContent = lastGoodMarketPayload
+      ? "The latest refresh failed. Prices below are from the last successful response at " + new Date(lastGoodMarketPayload.fetchedAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"}) + "; they may be stale. Retry to update."
+      : "Public market data is temporarily unavailable. No prices have been fabricated; try Refresh again.";
+    if (!lastGoodMarketPayload) document.querySelectorAll(".asset-row").forEach(row => {
       row.querySelector(".asset-price b").textContent = "Unavailable";
       row.querySelector(".asset-price small").textContent = "Feed unavailable";
       row.querySelector(".asset-change").textContent = "—";
     });
+  } finally {
+    marketRequestInFlight = false;
   }
 }
 $("refreshPrices").addEventListener("click", loadMarketPrices);
-
+loadMarketPrices();
 setInterval(loadMarketPrices, 60000);
 
 async function loadP2POffers() {
