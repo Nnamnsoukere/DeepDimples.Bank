@@ -73,6 +73,18 @@ $("profileForm").addEventListener("submit", (e) => {
   catch { toast("Could not save the profile in this browser."); }
 });
 
+// If a remote coin-logo CDN fails, keep the asset row legible with a symbol fallback.
+document.querySelectorAll(".asset-icon img").forEach((img) => {
+  img.addEventListener("error", () => {
+    const symbol = (img.alt || "Crypto").replace(/ logo$/i, "").slice(0, 3).toUpperCase();
+    const fallback = document.createElement("span");
+    fallback.className = "asset-logo-fallback";
+    fallback.textContent = symbol;
+    fallback.setAttribute("aria-label", img.alt || symbol);
+    img.replaceWith(fallback);
+  }, {once:true});
+});
+
 // Public spot market ticker feed; no API key. These are market prices, not wallet balances or guaranteed trade prices.
 const marketAssets = [
   {symbol:"BTC", name:"Bitcoin", search:"bitcoin btc"},
