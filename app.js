@@ -210,6 +210,8 @@ async function loadP2POffers() {
   }
 }
 $("refreshP2P").addEventListener("click", loadP2POffers);
+// Load public NGN P2P offers on page startup instead of leaving the panel idle.
+loadP2POffers();
 $("p2pAsset").addEventListener("change", () => { $("p2pStatus").textContent = "Asset changed. Refresh to load current offers."; });
 $("p2pSide").addEventListener("change", () => { $("p2pStatus").textContent = "Trade direction changed. Refresh to load current offers."; });
 $("p2pInfo").addEventListener("click", () => toast("Compare prices, minimum/maximum order limits and payment methods. Open the exchange offer to verify the advertiser, terms and price before paying. Never release crypto before confirming your bank payment."));
