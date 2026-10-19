@@ -37,13 +37,14 @@
       <div class="wallet-card-top"><span>Wallet overview</span><button id="hideBalance" aria-label="Hide balance">◉</button></div>
       <div class="wallet-value" id="walletValue">Not connected</div>
       <div class="wallet-card-bottom">
-        <span id="walletSubtitle">Connect a wallet to see real balances</span>
+        <span id="walletSubtitle">No wallet connected · watch-only address support</span>
         <label class="currency-select-label" for="currency">Display
           <select id="currency" aria-label="Display currency">
             <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="NGN">NGN</option><option value="USDT">USDT</option><option value="USDC">USDC</option><option value="BTC">BTC</option><option value="HB">HB</option>
           </select>
         </label>
       </div>
+      <div class="wallet-tools"><button class="outline-button" id="watchWallet">＋ Add public wallet address</button><span id="walletConnectionState" class="data-note">Watch-only · no signing or transfers</span></div>
       <div class="card-shine"></div>
     </section>
 
