@@ -153,69 +153,50 @@ async function loadP2POffers() {
   const asset = $("p2pAsset").value;
   const side = $("p2pSide").value;
   const container = $("p2pOffers");
-  $("p2pStatus").textContent = "Requesting public " + asset + "/NGN offers…";
-  container.textContent = "Loading offers…";
+  $("p2pStatus").textContent = "Checking supported NGN P2P providers…";
+  container.textContent = "Checking providers…";
   try {
     const response = await fetch("/api/p2p?asset=" + encodeURIComponent(asset) + "&side=" + encodeURIComponent(side), {cache:"no-store"});
     const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "P2P feed unavailable");
+    if (!response.ok) throw new Error(payload.error || "Provider directory unavailable");
     container.replaceChildren();
-    if (!payload.offers || !payload.offers.length) {
-      const empty = document.createElement("p");
-      empty.className = "data-note";
-      empty.textContent = "No usable offers returned by the feed.";
-      const fallback = document.createElement("a");
-      fallback.href = "https://p2p.binance.com/en/trade/" + (side === "BUY" ? "buy" : "sell") + "?fiat=NGN&asset=" + encodeURIComponent(asset);
-      fallback.target = "_blank"; fallback.rel = "noopener noreferrer";
-      fallback.textContent = "View current offers on Binance P2P";
-      container.append(empty, fallback);
-    } else {
-      for (const offer of payload.offers) {
-        const card = document.createElement("article");
-        card.className = "p2p-offer";
-        const heading = document.createElement("div");
-        heading.className = "p2p-offer-top";
-        const trader = document.createElement("b");
-        trader.textContent = offer.trader || "Marketplace advertiser";
-        const price = document.createElement("strong");
-        price.textContent = "₦" + Number(offer.priceNGN).toLocaleString("en-NG",{maximumFractionDigits:2});
-        heading.append(trader, price);
-        const details = document.createElement("p");
-        const limits = offer.minNGN && offer.maxNGN
-          ? "Limits ₦" + Number(offer.minNGN).toLocaleString("en-NG") + "–₦" + Number(offer.maxNGN).toLocaleString("en-NG")
-          : "Limits not supplied by provider";
-        details.textContent = limits + (offer.paymentMethods?.length ? " · " + offer.paymentMethods.join(", ") : "");
-        card.append(heading, details);
-        if (offer.offerId) {
-          const link = document.createElement("a");
-          link.href = "https://p2p.binance.com/en/trade/" + (side === "BUY" ? "buy" : "sell") + "?fiat=NGN&asset=" + encodeURIComponent(asset);
-          link.target = "_blank"; link.rel = "noopener noreferrer";
-          link.textContent = "Verify on Binance";
-          card.append(link);
-        }
-        container.append(card);
-      }
+    for (const provider of payload.providers || []) {
+      const card = document.createElement("article");
+      card.className = "p2p-offer";
+      const heading = document.createElement("div");
+      heading.className = "p2p-offer-top";
+      const name = document.createElement("b");
+      name.textContent = provider.name;
+      const status = document.createElement("span");
+      status.className = "connection-state";
+      status.textContent = "Live feed not connected";
+      heading.append(name, status);
+      const details = document.createElement("p");
+      details.textContent = provider.message;
+      const link = document.createElement("a");
+      link.href = provider.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Open " + provider.name + " marketplace ↗";
+      card.append(heading, details, link);
+      container.append(card);
     }
-    const time = payload.fetchedAt ? new Date(payload.fetchedAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "unknown";
-    $("p2pStatus").textContent = payload.count + " offers returned · " + time + " · " + payload.source + ". Verify final price and limits on exchange.";
-  } catch (error) {
+    const time = new Date(payload.fetchedAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    $("p2pStatus").textContent = "Provider directory checked " + time + ". No live offers are being claimed. Select a provider to view its current marketplace.";
+  } catch {
     container.replaceChildren();
-    const fallback = document.createElement("a");
-    fallback.href = "https://p2p.binance.com/en/trade/" + (side === "BUY" ? "buy" : "sell") + "?fiat=NGN&asset=" + encodeURIComponent(asset);
-    fallback.target = "_blank";
-    fallback.rel = "noopener noreferrer";
-    fallback.textContent = "Open Binance P2P to view current " + asset + "/NGN offers";
-    container.append(fallback);
-    $("p2pStatus").textContent = "The comparison feed could not be verified. Open the exchange directly; no estimated or sample prices are displayed.";
+    const note = document.createElement("p");
+    note.className = "data-note";
+    note.textContent = "Provider status could not be loaded. Try refreshing; no sample rates are displayed.";
+    container.append(note);
+    $("p2pStatus").textContent = "The P2P provider directory is temporarily unavailable.";
   }
 }
 $("refreshP2P").addEventListener("click", loadP2POffers);
-// Load public NGN P2P offers on page startup instead of leaving the panel idle.
 loadP2POffers();
-$("p2pAsset").addEventListener("change", () => { $("p2pStatus").textContent = "Asset changed. Refresh to load current offers."; });
-$("p2pSide").addEventListener("change", () => { $("p2pStatus").textContent = "Trade direction changed. Refresh to load current offers."; });
-$("p2pInfo").addEventListener("click", () => toast("Compare prices, minimum/maximum order limits and payment methods. Open the exchange offer to verify the advertiser, terms and price before paying. Never release crypto before confirming your bank payment."));
-
+$("p2pAsset").addEventListener("change", loadP2POffers);
+$("p2pSide").addEventListener("change", loadP2POffers);
+$("p2pInfo").addEventListener("click", () => toast("Check the exact asset, NGN amount, merchant completion history, payment method and order limits on the exchange before paying. Never release crypto before confirming receipt of payment."));
 async function loadConnectionStatus() {
   const list = $("connectionList");
   list.replaceChildren();
