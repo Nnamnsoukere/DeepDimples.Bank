@@ -376,12 +376,6 @@ submitFlutterwaveForm({
  body:()=>({network:$("stableNetwork").value,currency:$("stableCurrency").value,amount:$("stableAmount").value,address:$("stableAddress").value.trim(),confirmAddress:$("stableAddressConfirm").value.trim()}),
  success:result=>{setMessage("stableMessage","Submitted: "+result.id+" · status "+result.status+". Save this reference and check status before assuming settlement.");toast("Stablecoin transfer submitted to Flutterwave.");}
 });
-if($("stablecoinForm"))$("stablecoinForm").addEventListener("submit",()=>{});
-if($("sendStable"))$("sendStable").addEventListener("click",()=>{
- const form=$("stablecoinForm");if(!form.reportValidity())return;
- const pin=$("stablePin").value;
- // The request listener below is installed separately to attach the PIN without placing it in persistent storage.
-});
 
 submitFlutterwaveForm({
  formId:"bankPayoutForm",buttonId:"sendPayout",messageId:"payoutMessage",url:"/api/flutterwave-bank-payout",
