@@ -348,3 +348,49 @@ async function checkFlutterwaveReturn() {
   }
 }
 checkFlutterwaveReturn();
+
+function openDialog(id){const d=$(id);if(d)d.showModal();else toast("This form is not available yet.");}
+function setMessage(id,message){const el=$(id);if(el)el.textContent=message;}
+const stableNetwork=$("stableNetwork"), stableCurrency=$("stableCurrency");
+function syncStablecoinOptions(){
+ if(!stableNetwork||!stableCurrency)return;
+ const allowed={SOLANA:["USDC","USDT"],ETHEREUM:["USDC","USDT","RLUSD"],BASE:["USDC"],POLYGON:["USDC","USDT"]};
+ const prior=stableCurrency.value, list=allowed[stableNetwork.value]||["USDC"];
+ stableCurrency.replaceChildren(...list.map(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;return o;}));
+ stableCurrency.value=list.includes(prior)?prior:list[0];
+}
+if(stableNetwork){stableNetwork.addEventListener("change",syncStablecoinOptions);syncStablecoinOptions();}
+document.querySelectorAll(".quick-action").forEach(button=>{
+ const label=button.querySelector("b")?.textContent.trim();
+ if(label==="Send"){button.dataset.note="";button.addEventListener("click",()=>openDialog("stablecoinDialog"));}
+ if(label==="Receive"){button.dataset.note="";button.addEventListener("click",()=>openDialog("receiveDialog"));}
+ if(label==="Cash out"){button.dataset.note="";button.addEventListener("click",()=>openDialog("bankPayoutDialog"));}
+});
+const flwCard=$("flutterwaveCard");
+if(flwCard){flwCard.dataset.note="";flwCard.addEventListener("click",()=>openDialog("paymentDialog"));}
+[["cancelStable","stablecoinDialog"],["cancelPayout","bankPayoutDialog"],["cancelReceive","receiveDialog"],["cancelPayment","paymentDialog"]].forEach(([button,dialog])=>{if($(button))$(button).addEventListener("click",()=>$(dialog)?.close());});
+async function submitFlutterwaveForm({formId,buttonId,messageId,url,body,headers={},success}){
+ const form=$(formId), button=$(buttonId);if(!form||!button)return;
+ form.addEventListener("submit",async event=>{
+  event.preventDefault();button.disabled=true;const original=button.textContent;button.textContent="Submitting…";setMessage(messageId,"Sending request to Flutterwave…");
+  try{
+   const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json",...headers},body:JSON.stringify(body())});
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(result.error||"Flutterwave request failed.");
+   success(result);
+  }catch(error){setMessage(messageId,error.message||"Request failed. Please try again.");}
+  finally{button.disabled=false;button.textContent=original;}
+ });
+}
+submitFlutterwaveForm({
+ formId:"stablecoinForm",buttonId:"sendStable",messageId:"stableMessage",url:"/api/flutterwave-stablecoin-send",
+ headers:{"X-Transaction-Pin":""},
+ body:()=>({network:$("stableNetwork").value,currency:$("stableCurrency").value,amount:$("stableAmount").value,address:$("stableAddress").value.trim(),confirmAddress:$("stableAddressConfirm").value.trim()}),
+ success:result=>{setMessage("stableMessage","Submitted: "+result.id+" · status "+result.status+". Save this reference and check status before assuming settlement.");toast("Stablecoin transfer submitted to Flutterwave.");}
+});
+if($("stablecoinForm"))$("stablecoinForm").addEventListener("submit",()=>{});
+if($("sendStable"))$("sendStable").addEventListener("click",()=>{
+ const form=$("stablecoinForm");if(!form.reportValidity())return;
+ const pin=$("stablePin").value;
+ // The request listener below is installed separately to attach the PIN without placing it in persistent storage.
+});
