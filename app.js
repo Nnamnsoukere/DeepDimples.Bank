@@ -283,18 +283,6 @@ function openPaymentDialog() {
   setPaymentMessage("");
   paymentDialog.showModal();
 }
-document.querySelectorAll(".quick-action").forEach((button) => {
-  if (button.querySelector("b")?.textContent.trim() === "Cash out") {
-    button.dataset.note = "";
-    button.addEventListener("click", openPaymentDialog);
-  }
-});
-document.querySelectorAll(".service-card").forEach((button) => {
-  if (button.id === "flutterwaveCard") {
-    button.dataset.note = "";
-    button.addEventListener("click", openPaymentDialog);
-  }
-});
 if ($("cancelPayment")) $("cancelPayment").addEventListener("click", () => paymentDialog.close());
 if (paymentForm) paymentForm.addEventListener("submit", async (event) => {
   event.preventDefault();
