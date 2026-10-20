@@ -271,3 +271,80 @@ async function loadConnectionStatus() {
 }
 $("refreshConnections").addEventListener("click", loadConnectionStatus);
 loadConnectionStatus();
+
+// Flutterwave hosted checkout: server creates the checkout and verifies return parameters.
+// This UI never treats a redirect alone as proof of payment or credits a balance.
+const paymentDialog = $("paymentDialog");
+const paymentMessage = $("paymentMessage");
+const paymentForm = $("paymentForm");
+function setPaymentMessage(message) { if (paymentMessage) paymentMessage.textContent = message; }
+function openPaymentDialog() {
+  if (!paymentDialog) { toast("Payment form is not available. Refresh the app."); return; }
+  setPaymentMessage("");
+  paymentDialog.showModal();
+}
+document.querySelectorAll(".quick-action").forEach((button) => {
+  if (button.querySelector("b")?.textContent.trim() === "Cash out") {
+    button.dataset.note = "";
+    button.addEventListener("click", openPaymentDialog);
+  }
+});
+document.querySelectorAll(".service-card").forEach((button) => {
+  if (button.id === "flutterwaveCard") {
+    button.dataset.note = "";
+    button.addEventListener("click", openPaymentDialog);
+  }
+});
+if ($("cancelPayment")) $("cancelPayment").addEventListener("click", () => paymentDialog.close());
+if (paymentForm) paymentForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = $("startPayment");
+  button.disabled = true;
+  button.textContent = "Connecting…";
+  setPaymentMessage("Creating a secure Flutterwave checkout…");
+  try {
+    const response = await fetch("/api/flutterwave-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        email: $("paymentEmail").value.trim(),
+        name: $("paymentName").value.trim(),
+        amount: $("paymentAmount").value,
+        currency: $("paymentCurrency").value
+      })
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !body.checkoutUrl) throw new Error(body.error || "Could not create checkout.");
+    window.location.assign(body.checkoutUrl);
+  } catch (error) {
+    setPaymentMessage(error.message || "Could not start checkout. Please try again.");
+    button.disabled = false;
+    button.textContent = "Continue to Flutterwave";
+  }
+});
+async function checkFlutterwaveReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("flw_return")) return;
+  const txRef = params.get("tx_ref") || "";
+  const transactionId = params.get("transaction_id") || "";
+  const status = params.get("status") || "";
+  history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+  if (status === "cancelled" || !txRef || !transactionId) {
+    toast(status === "cancelled" ? "Flutterwave checkout was cancelled. No balance was changed." : "Checkout returned without a transaction ID. No balance was changed.");
+    return;
+  }
+  try {
+    const query = new URLSearchParams({ tx_ref: txRef, transaction_id: transactionId });
+    const response = await fetch("/api/flutterwave-verify?" + query.toString(), { headers: { "Accept": "application/json" }, cache: "no-store" });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.message || "Could not verify the transaction.");
+    if (body.verified && body.status === "successful") {
+      toast("Flutterwave verified " + body.currency + " " + Number(body.amount).toLocaleString() + ". This app has not yet credited a spendable balance.");
+    } else {
+      toast("Payment status: " + (body.status || "unverified") + ". No balance was changed.");
+    }
+  } catch (error) {
+    toast(error.message || "Could not verify payment. Check the transaction status in Flutterwave.");
+  }
+}
+checkFlutterwaveReturn();
