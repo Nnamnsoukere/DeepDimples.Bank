@@ -1,9 +1,11 @@
+import { requireOwner } from "../lib/owner-session.js";
 import crypto from "node:crypto";
 import { flwRequest, transactionPinValid } from "../lib/flutterwave-v4.js";
 const supported = { SOLANA:["USDT","USDC"], ETHEREUM:["USDT","USDC","RLUSD"], BASE:["USDC"], POLYGON:["USDT","USDC"] };
 export default async function handler(req,res) {
   res.setHeader("Cache-Control","no-store"); res.setHeader("X-Content-Type-Options","nosniff");
   if(req.method!=="POST"){res.setHeader("Allow","POST");return res.status(405).json({error:"Method not allowed"});}
+ if(!requireOwner(req,res))return;
   if(!transactionPinValid(req)) return res.status(401).json({error:"Transaction PIN missing or incorrect. Configure APP_TRANSACTION_PIN in Vercel."});
   const b=req.body||{}, network=String(b.network||"").toUpperCase(), currency=String(b.currency||"").toUpperCase(), address=String(b.address||"").trim(), amount=Number(b.amount);
   if(!supported[network]?.includes(currency)) return res.status(400).json({error:"Unsupported token/network combination."});
