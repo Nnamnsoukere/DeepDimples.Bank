@@ -1,3 +1,4 @@
+import { requireOwner } from "../lib/owner-session.js";
 import crypto from "node:crypto";
 
 function parseSignedReference(txRef, signingSecret) {
@@ -20,6 +21,7 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
   if (req.method !== "GET") { res.setHeader("Allow", "GET"); return res.status(405).json({ error: "Method not allowed" }); }
+ if(!requireOwner(req,res))return;
   const secret = process.env.FLW_SECRET_KEY, signingSecret = process.env.APP_SIGNING_SECRET;
   if (!secret || !signingSecret) return res.status(503).json({ error: "Flutterwave verification is not configured." });
   const txRef = String(req.query.tx_ref || "");
