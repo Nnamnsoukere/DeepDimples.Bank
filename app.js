@@ -376,14 +376,19 @@ if(flwCard){flwCard.dataset.note="";flwCard.addEventListener("click",()=>openDia
 [["cancelStable","stablecoinDialog"],["cancelPayout","bankPayoutDialog"],["cancelReceive","receiveDialog"],["cancelPayment","paymentDialog"]].forEach(([button,dialog])=>{if($(button))$(button).addEventListener("click",()=>$(dialog)?.close());});
 async function submitFlutterwaveForm({formId,buttonId,messageId,url,body,headers={},success}){
  const form=$(formId), button=$(buttonId);if(!form||!button)return;
+ const isTransfer=url==="/api/flutterwave-stablecoin-send"||url==="/api/flutterwave-bank-payout";
+ let pendingRequestId=null;
  form.addEventListener("submit",async event=>{
   event.preventDefault();button.disabled=true;const original=button.textContent;button.textContent="Submitting…";setMessage(messageId,"Sending request to Flutterwave…");
   try{
-   const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json",...(typeof headers==="function"?headers():headers)},body:JSON.stringify(body())});
+   const requestBody=body();
+   if(isTransfer){pendingRequestId ||= crypto.randomUUID();requestBody.requestId=pendingRequestId;}
+   const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json",...(typeof headers==="function"?headers():headers)},body:JSON.stringify(requestBody)});
    const result=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(result.error||"Flutterwave request failed.");
+   if(isTransfer)pendingRequestId=null;
    success(result);
-  }catch(error){setMessage(messageId,error.message||"Request failed. Please try again.");}
+  }catch(error){setMessage(messageId,error.message||"Request failed. Please check transaction history before retrying.");}
   finally{button.disabled=false;button.textContent=original;}
  });
 }
