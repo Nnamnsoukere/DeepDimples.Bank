@@ -374,7 +374,7 @@ async function submitFlutterwaveForm({formId,buttonId,messageId,url,body,headers
  form.addEventListener("submit",async event=>{
   event.preventDefault();button.disabled=true;const original=button.textContent;button.textContent="Submitting…";setMessage(messageId,"Sending request to Flutterwave…");
   try{
-   const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json",...headers},body:JSON.stringify(body())});
+   const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json",...(typeof headers==="function"?headers():headers)},body:JSON.stringify(body())});
    const result=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(result.error||"Flutterwave request failed.");
    success(result);
@@ -384,7 +384,7 @@ async function submitFlutterwaveForm({formId,buttonId,messageId,url,body,headers
 }
 submitFlutterwaveForm({
  formId:"stablecoinForm",buttonId:"sendStable",messageId:"stableMessage",url:"/api/flutterwave-stablecoin-send",
- headers:{"X-Transaction-Pin":""},
+ headers:()=>({"X-Transaction-Pin":$("stablePin").value}),
  body:()=>({network:$("stableNetwork").value,currency:$("stableCurrency").value,amount:$("stableAmount").value,address:$("stableAddress").value.trim(),confirmAddress:$("stableAddressConfirm").value.trim()}),
  success:result=>{setMessage("stableMessage","Submitted: "+result.id+" · status "+result.status+". Save this reference and check status before assuming settlement.");toast("Stablecoin transfer submitted to Flutterwave.");}
 });
@@ -393,4 +393,27 @@ if($("sendStable"))$("sendStable").addEventListener("click",()=>{
  const form=$("stablecoinForm");if(!form.reportValidity())return;
  const pin=$("stablePin").value;
  // The request listener below is installed separately to attach the PIN without placing it in persistent storage.
+});
+
+submitFlutterwaveForm({
+ formId:"bankPayoutForm",buttonId:"sendPayout",messageId:"payoutMessage",url:"/api/flutterwave-bank-payout",
+ headers:()=>({"X-Transaction-Pin":$("payoutPin").value}),
+ body:()=>({amount:$("payoutAmount").value,currency:"NGN",bankCode:$("payoutBankCode").value.trim(),accountNumber:$("payoutAccount").value.trim(),confirmAccountNumber:$("payoutAccountConfirm").value.trim()}),
+ success:result=>{setMessage("payoutMessage","Submitted: "+result.id+" · status "+result.status+". Check Flutterwave transfer status before assuming funds arrived.");toast("Bank payout submitted to Flutterwave.");}
+});
+if($("loadReceive"))$("loadReceive").addEventListener("click",async()=>{
+ const button=$("loadReceive");button.disabled=true;setMessage("receiveAddresses","Loading configured receive addresses…");
+ try{
+  const response=await fetch("/api/flutterwave-receive-addresses",{headers:{"X-Transaction-Pin":$("receivePin").value,"Accept":"application/json"},cache:"no-store"});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"Could not load receive addresses.");
+  const container=$("receiveAddresses");container.replaceChildren();
+  let count=0;
+  for(const [network,tokens] of Object.entries(data.receiveAddresses||{}))for(const [token,address] of Object.entries(tokens)){
+   count++;const p=document.createElement("p");p.className="data-note";p.textContent=network+" · "+token+" · "+address;
+   const copy=document.createElement("button");copy.type="button";copy.className="outline-button";copy.textContent="Copy address";copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(address);toast("Address copied.");}catch{toast("Copy unavailable. Select the address manually.");}});p.append(" ",copy);container.append(p);
+  }
+  if(!count){const p=document.createElement("p");p.className="data-note";p.textContent="No receive addresses configured yet. Add only the addresses shown in your Flutterwave dashboard to Vercel Environment Variables.";container.append(p);}
+ }catch(error){setMessage("receiveAddresses",error.message||"Could not load addresses.");}
+ finally{button.disabled=false;}
 });
