@@ -6,6 +6,10 @@ This branch implements a first pass of Flutterwave-hosted fiat checkout, server-
 
 Set them in Vercel Project → Settings → Environment Variables. Do not put secret keys into HTML or app.js, and never commit their values to GitHub.
 
+### Owner-only access (required)
+- `APP_ACCESS_PASSWORD`: a strong, unique password for your private workspace.
+- `APP_SESSION_SECRET`: a long random server-only secret used to sign eight-hour HttpOnly session cookies.
+
 ### Hosted checkout and transaction verification (Flutterwave Standard / V3 API)
 - `FLW_PUBLIC_KEY`: your Flutterwave public key (not exposed by this server code).
 - `FLW_SECRET_KEY`: your Flutterwave secret key, test key first.
@@ -37,4 +41,4 @@ Set them in Vercel Project → Settings → Environment Variables. Do not put se
 The transfer API uses Flutterwave V4 client credentials and the V4 `/direct-transfers` and `/transfers/{id}` endpoints. Bank payout in this initial UI supports NGN and expects a 10-digit account number plus a three-digit Flutterwave bank code. Check account-specific eligibility, limits, fees, whitelisted IPs, and current documentation before live use.
 
 ## Before public production launch
-This project currently deploys as a public static website. The transaction PIN check is only a minimum guard. Before handling real funds, implement an owner login/session with secure cookies, CSRF protection where applicable, rate limiting and abuse monitoring, a persistent database ledger, idempotent transaction records, verified webhook handling, audit logs, server-side ownership checks, backup/recovery, and end-to-end tests in Flutterwave sandbox. Do not treat a checkout redirect or transfer submission response as settlement. Stablecoin transfers are irreversible; confirm network, token and recipient address before sending.
+This project currently deploys as a public static website with an owner-password gate and signed HttpOnly session cookie. Before handling real funds, add rate limiting and abuse monitoring, a persistent database ledger, stable idempotency keys stored per operation, verified webhook handling, audit logs, backup/recovery, and end-to-end tests in Flutterwave sandbox. The transaction PIN is an additional step-up check, not a replacement for the owner session. Do not treat a checkout redirect or transfer submission response as settlement. Stablecoin transfers are irreversible; confirm network, token and recipient address before sending.
