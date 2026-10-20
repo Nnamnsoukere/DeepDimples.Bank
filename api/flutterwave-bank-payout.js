@@ -1,8 +1,10 @@
+import { requireOwner } from "../lib/owner-session.js";
 import crypto from "node:crypto";
 import { flwRequest, transactionPinValid } from "../lib/flutterwave-v4.js";
 export default async function handler(req,res){
  res.setHeader("Cache-Control","no-store");res.setHeader("X-Content-Type-Options","nosniff");
  if(req.method!=="POST"){res.setHeader("Allow","POST");return res.status(405).json({error:"Method not allowed"});}
+ if(!requireOwner(req,res))return;
  if(!transactionPinValid(req))return res.status(401).json({error:"Transaction PIN missing or incorrect. Configure APP_TRANSACTION_PIN in Vercel."});
  const b=req.body||{}, account=String(b.accountNumber||"").trim(), bank=String(b.bankCode||"").trim(), amount=Number(b.amount), currency=String(b.currency||"NGN").toUpperCase();
  if(currency!=="NGN")return res.status(400).json({error:"This first bank payout flow supports NGN only. Other corridors require their own recipient schemas."});
