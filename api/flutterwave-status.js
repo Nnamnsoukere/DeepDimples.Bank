@@ -3,7 +3,7 @@ export default async function handler(req,res){
  res.setHeader("Cache-Control","no-store");res.setHeader("X-Content-Type-Options","nosniff");
  if(req.method!=="GET"){res.setHeader("Allow","GET");return res.status(405).json({error:"Method not allowed"});}
  const present={
-  hostedCheckout:{secretKey:Boolean(process.env.FLW_SECRET_KEY),publicKey:Boolean(process.env.FLW_PUBLIC_KEY),appBaseUrl:Boolean(process.env.APP_BASE_URL),referenceSigningSecret:Boolean(process.env.APP_SIGNING_SECRET)},
+  hostedCheckout:{secretKey:Boolean(process.env.FLW_SECRET_KEY),appBaseUrl:Boolean(process.env.APP_BASE_URL),referenceSigningSecret:Boolean(process.env.APP_SIGNING_SECRET)},
   v4Transfers:{clientId:Boolean(process.env.FLW_CLIENT_ID),clientSecret:Boolean(process.env.FLW_CLIENT_SECRET),transactionPin:Boolean(process.env.APP_TRANSACTION_PIN),environment:process.env.FLW_V4_ENV==="live"?"live":"sandbox"},
   receiveAddresses:{
    SOLANA:{USDC:Boolean(process.env.FLW_RECEIVE_SOLANA_USDC),USDT:Boolean(process.env.FLW_RECEIVE_SOLANA_USDT)},
