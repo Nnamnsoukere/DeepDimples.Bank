@@ -1,3 +1,4 @@
+import { requireOwner } from "../lib/owner-session.js";
 import crypto from "node:crypto";
 
 const ALLOWED_CURRENCIES = new Set(["NGN", "USD", "GBP", "EUR"]);
@@ -6,6 +7,7 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
   if (req.method !== "POST") { res.setHeader("Allow", "POST"); return json(res, 405, { error: "Method not allowed" }); }
+ if(!requireOwner(req,res))return;
   const secret = process.env.FLW_SECRET_KEY;
   const baseUrl = process.env.APP_BASE_URL;
   const signingSecret = process.env.APP_SIGNING_SECRET;
