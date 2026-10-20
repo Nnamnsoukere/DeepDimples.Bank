@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { flwRequest, transactionPinValid } from "../lib/flutterwave-v4.js";
 export default async function handler(req,res){
  res.setHeader("Cache-Control","no-store");res.setHeader("X-Content-Type-Options","nosniff");
@@ -9,7 +10,7 @@ export default async function handler(req,res){
  if(!Number.isFinite(amount)||amount<1||amount>100000000||!/^\d+(\.\d{1,2})?$/.test(String(b.amount)))return res.status(400).json({error:"Enter a valid NGN amount with up to two decimals."});
  if(b.confirmAccountNumber!==account)return res.status(400).json({error:"Account number confirmation does not match."});
  try{
-  const d=await flwRequest("/direct-transfers",{method:"POST",body:JSON.stringify({action:"instant",type:"bank",narration:"DeepDimples Bank bank payout",payment_instruction:{source_currency:"NGN",destination_currency:"NGN",amount:{applies_to:"destination_currency",value:amount},recipient:{bank:{account_number:account,code:bank}}}})});
+  const d=await flwRequest("/direct-transfers",{method:"POST",body:JSON.stringify({action:"instant",type:"bank",reference:"DDB-"+crypto.randomUUID(),narration:"DeepDimples Bank bank payout",payment_instruction:{source_currency:"NGN",destination_currency:"NGN",amount:{applies_to:"destination_currency",value:amount},recipient:{bank:{account_number:account,code:bank}}}})});
   return res.status(200).json({id:d.id,reference:d.reference||null,status:d.status,currency:"NGN",amount:d.amount?.value??amount,message:"Payout submitted to Flutterwave. Verify transfer status before treating it as complete."});
  }catch(e){return res.status(e.status&&e.status<500?e.status:502).json({error:e.message||"Flutterwave bank payout failed."});}
 }
