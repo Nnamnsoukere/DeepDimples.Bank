@@ -416,3 +416,28 @@ if($("loadReceive"))$("loadReceive").addEventListener("click",async()=>{
  }catch(error){setMessage("receiveAddresses",error.message||"Could not load addresses.");}
  finally{button.disabled=false;}
 });
+
+async function ownerSessionRefresh(){
+ const gate=$("ownerGate");if(!gate)return;
+ try{
+  const response=await fetch("/api/session",{headers:{"Accept":"application/json"},cache:"no-store"});
+  const data=await response.json().catch(()=>({}));
+  gate.classList.toggle("hidden",Boolean(response.ok&&data.authenticated));
+  if(!response.ok)setMessage("ownerLoginMessage",data.error||"Owner session unavailable.");
+ }catch{gate.classList.remove("hidden");setMessage("ownerLoginMessage","Could not check your session. Refresh and try again.");}
+}
+if($("ownerLoginForm"))$("ownerLoginForm").addEventListener("submit",async event=>{
+ event.preventDefault();const button=$("ownerLoginButton");button.disabled=true;button.textContent="Signing in…";setMessage("ownerLoginMessage","");
+ try{
+  const response=await fetch("/api/session",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({password:$("ownerPassword").value})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok||!data.authenticated)throw new Error(data.error||"Sign-in failed.");
+  $("ownerPassword").value="";$("ownerGate").classList.add("hidden");toast("Signed in to your private workspace.");
+ }catch(error){setMessage("ownerLoginMessage",error.message||"Sign-in failed.");}
+ finally{button.disabled=false;button.textContent="Sign in";}
+});
+if($("ownerLogout"))$("ownerLogout").addEventListener("click",async()=>{
+ try{await fetch("/api/session",{method:"DELETE",headers:{"Accept":"application/json"}});}catch{}
+ $("ownerGate")?.classList.remove("hidden");setMessage("ownerLoginMessage","You have signed out.");$("ownerPassword")?.focus();
+});
+ownerSessionRefresh();
