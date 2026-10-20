@@ -337,6 +337,23 @@ async function checkFlutterwaveReturn() {
 }
 checkFlutterwaveReturn();
 
+
+async function showTransferStatus(messageId,transferId){
+ const el=$(messageId);if(!el)return;
+ el.replaceChildren(document.createTextNode("Transfer ID: "+transferId+" "));
+ const button=document.createElement("button");button.type="button";button.className="outline-button";button.textContent="Check status";
+ button.addEventListener("click",async()=>{
+  button.disabled=true;button.textContent="Checking…";
+  try{
+   const response=await fetch("/api/flutterwave-transfer-status?id="+encodeURIComponent(transferId),{headers:{"Accept":"application/json"},cache:"no-store"});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.error||"Could not check status.");
+   const status=document.createElement("span");status.textContent=" Status: "+data.status+" · "+(data.amount?.value??"")+" "+(data.destinationCurrency||"");el.append(" ",status);
+  }catch(error){toast(error.message||"Could not check transfer status.");}
+  finally{button.disabled=false;button.textContent="Refresh status";}
+ });
+ el.append(button);
+}
 function openDialog(id){const d=$(id);if(d)d.showModal();else toast("This form is not available yet.");}
 function setMessage(id,message){const el=$(id);if(el)el.textContent=message;}
 const stableNetwork=$("stableNetwork"), stableCurrency=$("stableCurrency");
@@ -374,14 +391,14 @@ submitFlutterwaveForm({
  formId:"stablecoinForm",buttonId:"sendStable",messageId:"stableMessage",url:"/api/flutterwave-stablecoin-send",
  headers:()=>({"X-Transaction-Pin":$("stablePin").value}),
  body:()=>({network:$("stableNetwork").value,currency:$("stableCurrency").value,amount:$("stableAmount").value,address:$("stableAddress").value.trim(),confirmAddress:$("stableAddressConfirm").value.trim()}),
- success:result=>{setMessage("stableMessage","Submitted: "+result.id+" · status "+result.status+". Save this reference and check status before assuming settlement.");toast("Stablecoin transfer submitted to Flutterwave.");}
+ success:result=>{setMessage("stableMessage","Submitted: "+result.id+" · status "+result.status+".");showTransferStatus("stableMessage",result.id);toast("Stablecoin transfer submitted to Flutterwave.");}
 });
 
 submitFlutterwaveForm({
  formId:"bankPayoutForm",buttonId:"sendPayout",messageId:"payoutMessage",url:"/api/flutterwave-bank-payout",
  headers:()=>({"X-Transaction-Pin":$("payoutPin").value}),
  body:()=>({amount:$("payoutAmount").value,currency:"NGN",bankCode:$("payoutBankCode").value.trim(),accountNumber:$("payoutAccount").value.trim(),confirmAccountNumber:$("payoutAccountConfirm").value.trim()}),
- success:result=>{setMessage("payoutMessage","Submitted: "+result.id+" · status "+result.status+". Check Flutterwave transfer status before assuming funds arrived.");toast("Bank payout submitted to Flutterwave.");}
+ success:result=>{setMessage("payoutMessage","Submitted: "+result.id+" · status "+result.status+".");showTransferStatus("payoutMessage",result.id);toast("Bank payout submitted to Flutterwave.");}
 });
 if($("loadReceive"))$("loadReceive").addEventListener("click",async()=>{
  const button=$("loadReceive");button.disabled=true;setMessage("receiveAddresses","Loading configured receive addresses…");
