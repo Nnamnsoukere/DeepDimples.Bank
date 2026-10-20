@@ -11,9 +11,7 @@ Set them in Vercel Project → Settings → Environment Variables. Do not put se
 - `APP_SESSION_SECRET`: a long random server-only secret used to sign eight-hour HttpOnly session cookies.
 
 ### Hosted checkout and transaction verification (Flutterwave Standard / V3 API)
-- `FLW_PUBLIC_KEY`: your Flutterwave public key (not exposed by this server code).
 - `FLW_SECRET_KEY`: your Flutterwave secret key, test key first.
-- `FLW_SECRET_HASH`: webhook secret hash, reserved for webhook verification implementation.
 - `APP_BASE_URL`: canonical HTTPS site URL.
 - `APP_SIGNING_SECRET`: long random server-only string used to sign checkout references.
 
