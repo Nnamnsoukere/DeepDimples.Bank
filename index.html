@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="ownerGate" class="owner-gate" role="dialog" aria-modal="true" aria-labelledby="ownerGateTitle"><form id="ownerLoginForm" class="owner-gate-card"><p class="eyebrow">PRIVATE WORKSPACE</p><h1 id="ownerGateTitle">DeepDimples Bank</h1><p>Sign in to access your personal dashboard and payment actions.</p><label for="ownerPassword">Owner password</label><input id="ownerPassword" type="password" required autocomplete="current-password" maxlength="256" placeholder="Enter your owner password"><button type="submit" id="ownerLoginButton" class="save-button">Sign in</button><p id="ownerLoginMessage" class="data-note" role="status" aria-live="polite"></p></form></div>
 <div class="app-shell">
   <header class="topbar">
     <button class="profile profile-edit" id="editProfile" aria-label="Edit profile">
@@ -20,6 +21,7 @@
       <button class="icon-button" id="searchToggle" aria-label="Search">⌕</button>
       <button class="icon-button" id="notifications" aria-label="Notifications">♧</button>
       <button class="icon-button" id="themeToggle" aria-label="Toggle light mode">☼</button>
+      <button class="icon-button" id="ownerLogout" aria-label="Sign out" title="Sign out">⇥</button>
     </div>
   </header>
 
