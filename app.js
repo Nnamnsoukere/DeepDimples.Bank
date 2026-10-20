@@ -271,3 +271,178 @@ async function loadConnectionStatus() {
 }
 $("refreshConnections").addEventListener("click", loadConnectionStatus);
 loadConnectionStatus();
+
+// Flutterwave hosted checkout: server creates the checkout and verifies return parameters.
+// This UI never treats a redirect alone as proof of payment or credits a balance.
+const paymentDialog = $("paymentDialog");
+const paymentMessage = $("paymentMessage");
+const paymentForm = $("paymentForm");
+function setPaymentMessage(message) { if (paymentMessage) paymentMessage.textContent = message; }
+function openPaymentDialog() {
+  if (!paymentDialog) { toast("Payment form is not available. Refresh the app."); return; }
+  setPaymentMessage("");
+  paymentDialog.showModal();
+}
+if ($("cancelPayment")) $("cancelPayment").addEventListener("click", () => paymentDialog.close());
+if (paymentForm) paymentForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = $("startPayment");
+  button.disabled = true;
+  button.textContent = "Connecting…";
+  setPaymentMessage("Creating a secure Flutterwave checkout…");
+  try {
+    const response = await fetch("/api/flutterwave-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        email: $("paymentEmail").value.trim(),
+        name: $("paymentName").value.trim(),
+        amount: $("paymentAmount").value,
+        currency: $("paymentCurrency").value
+      })
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !body.checkoutUrl) throw new Error(body.error || "Could not create checkout.");
+    window.location.assign(body.checkoutUrl);
+  } catch (error) {
+    setPaymentMessage(error.message || "Could not start checkout. Please try again.");
+    button.disabled = false;
+    button.textContent = "Continue to Flutterwave";
+  }
+});
+async function checkFlutterwaveReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("flw_return")) return;
+  const txRef = params.get("tx_ref") || "";
+  const transactionId = params.get("transaction_id") || "";
+  const status = params.get("status") || "";
+  history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+  if (status === "cancelled" || !txRef || !transactionId) {
+    toast(status === "cancelled" ? "Flutterwave checkout was cancelled. No balance was changed." : "Checkout returned without a transaction ID. No balance was changed.");
+    return;
+  }
+  try {
+    const query = new URLSearchParams({ tx_ref: txRef, transaction_id: transactionId });
+    const response = await fetch("/api/flutterwave-verify?" + query.toString(), { headers: { "Accept": "application/json" }, cache: "no-store" });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.message || "Could not verify the transaction.");
+    if (body.verified && body.status === "successful") {
+      toast("Flutterwave verified " + body.currency + " " + Number(body.amount).toLocaleString() + ". This app has not yet credited a spendable balance.");
+    } else {
+      toast("Payment status: " + (body.status || "unverified") + ". No balance was changed.");
+    }
+  } catch (error) {
+    toast(error.message || "Could not verify payment. Check the transaction status in Flutterwave.");
+  }
+}
+checkFlutterwaveReturn();
+
+
+async function showTransferStatus(messageId,transferId){
+ const el=$(messageId);if(!el)return;
+ el.replaceChildren(document.createTextNode("Transfer ID: "+transferId+" "));
+ const button=document.createElement("button");button.type="button";button.className="outline-button";button.textContent="Check status";
+ button.addEventListener("click",async()=>{
+  button.disabled=true;button.textContent="Checking…";
+  try{
+   const response=await fetch("/api/flutterwave-transfer-status?id="+encodeURIComponent(transferId),{headers:{"Accept":"application/json"},cache:"no-store"});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.error||"Could not check status.");
+   const status=document.createElement("span");status.textContent=" Status: "+data.status+" · "+(data.amount?.value??"")+" "+(data.destinationCurrency||"");el.append(" ",status);
+  }catch(error){toast(error.message||"Could not check transfer status.");}
+  finally{button.disabled=false;button.textContent="Refresh status";}
+ });
+ el.append(button);
+}
+function openDialog(id){const d=$(id);if(d)d.showModal();else toast("This form is not available yet.");}
+function setMessage(id,message){const el=$(id);if(el)el.textContent=message;}
+const stableNetwork=$("stableNetwork"), stableCurrency=$("stableCurrency");
+function syncStablecoinOptions(){
+ if(!stableNetwork||!stableCurrency)return;
+ const allowed={SOLANA:["USDC","USDT"],ETHEREUM:["USDC","USDT","RLUSD"],BASE:["USDC"],POLYGON:["USDC","USDT"]};
+ const prior=stableCurrency.value, list=allowed[stableNetwork.value]||["USDC"];
+ stableCurrency.replaceChildren(...list.map(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;return o;}));
+ stableCurrency.value=list.includes(prior)?prior:list[0];
+}
+if(stableNetwork){stableNetwork.addEventListener("change",syncStablecoinOptions);syncStablecoinOptions();}
+document.querySelectorAll(".quick-action").forEach(button=>{
+ const label=button.querySelector("b")?.textContent.trim();
+ if(label==="Send"){button.dataset.note="";button.addEventListener("click",()=>openDialog("stablecoinDialog"));}
+ if(label==="Receive"){button.dataset.note="";button.addEventListener("click",()=>openDialog("receiveDialog"));}
+ if(label==="Cash out"){button.dataset.note="";button.addEventListener("click",()=>openDialog("bankPayoutDialog"));}
+});
+const flwCard=$("flutterwaveCard");
+if(flwCard){flwCard.dataset.note="";flwCard.addEventListener("click",()=>openDialog("paymentDialog"));}
+[["cancelStable","stablecoinDialog"],["cancelPayout","bankPayoutDialog"],["cancelReceive","receiveDialog"],["cancelPayment","paymentDialog"]].forEach(([button,dialog])=>{if($(button))$(button).addEventListener("click",()=>$(dialog)?.close());});
+async function submitFlutterwaveForm({formId,buttonId,messageId,url,body,headers={},success}){
+ const form=$(formId), button=$(buttonId);if(!form||!button)return;
+ const isTransfer=url==="/api/flutterwave-stablecoin-send"||url==="/api/flutterwave-bank-payout";
+ let pendingRequestId=null;
+ form.addEventListener("submit",async event=>{
+  event.preventDefault();button.disabled=true;const original=button.textContent;button.textContent="Submitting…";setMessage(messageId,"Sending request to Flutterwave…");
+  try{
+   const requestBody=body();
+   if(isTransfer){pendingRequestId ||= crypto.randomUUID();requestBody.requestId=pendingRequestId;}
+   const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json",...(typeof headers==="function"?headers():headers)},body:JSON.stringify(requestBody)});
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(result.error||"Flutterwave request failed.");
+   if(isTransfer)pendingRequestId=null;
+   success(result);
+  }catch(error){setMessage(messageId,error.message||"Request failed. Please check transaction history before retrying.");}
+  finally{button.disabled=false;button.textContent=original;}
+ });
+}
+submitFlutterwaveForm({
+ formId:"stablecoinForm",buttonId:"sendStable",messageId:"stableMessage",url:"/api/flutterwave-stablecoin-send",
+ headers:()=>({"X-Transaction-Pin":$("stablePin").value}),
+ body:()=>({network:$("stableNetwork").value,currency:$("stableCurrency").value,amount:$("stableAmount").value,address:$("stableAddress").value.trim(),confirmAddress:$("stableAddressConfirm").value.trim()}),
+ success:result=>{setMessage("stableMessage","Submitted: "+result.id+" · status "+result.status+".");showTransferStatus("stableMessage",result.id);toast("Stablecoin transfer submitted to Flutterwave.");}
+});
+
+submitFlutterwaveForm({
+ formId:"bankPayoutForm",buttonId:"sendPayout",messageId:"payoutMessage",url:"/api/flutterwave-bank-payout",
+ headers:()=>({"X-Transaction-Pin":$("payoutPin").value}),
+ body:()=>({amount:$("payoutAmount").value,currency:"NGN",bankCode:$("payoutBankCode").value.trim(),accountNumber:$("payoutAccount").value.trim(),confirmAccountNumber:$("payoutAccountConfirm").value.trim()}),
+ success:result=>{setMessage("payoutMessage","Submitted: "+result.id+" · status "+result.status+".");showTransferStatus("payoutMessage",result.id);toast("Bank payout submitted to Flutterwave.");}
+});
+if($("loadReceive"))$("loadReceive").addEventListener("click",async()=>{
+ const button=$("loadReceive");button.disabled=true;setMessage("receiveAddresses","Loading configured receive addresses…");
+ try{
+  const response=await fetch("/api/flutterwave-receive-addresses",{headers:{"X-Transaction-Pin":$("receivePin").value,"Accept":"application/json"},cache:"no-store"});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"Could not load receive addresses.");
+  const container=$("receiveAddresses");container.replaceChildren();
+  let count=0;
+  for(const [network,tokens] of Object.entries(data.receiveAddresses||{}))for(const [token,address] of Object.entries(tokens)){
+   count++;const p=document.createElement("p");p.className="data-note";p.textContent=network+" · "+token+" · "+address;
+   const copy=document.createElement("button");copy.type="button";copy.className="outline-button";copy.textContent="Copy address";copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(address);toast("Address copied.");}catch{toast("Copy unavailable. Select the address manually.");}});p.append(" ",copy);container.append(p);
+  }
+  if(!count){const p=document.createElement("p");p.className="data-note";p.textContent="No receive addresses configured yet. Add only the addresses shown in your Flutterwave dashboard to Vercel Environment Variables.";container.append(p);}
+ }catch(error){setMessage("receiveAddresses",error.message||"Could not load addresses.");}
+ finally{button.disabled=false;}
+});
+
+async function ownerSessionRefresh(){
+ const gate=$("ownerGate");if(!gate)return;
+ try{
+  const response=await fetch("/api/session",{headers:{"Accept":"application/json"},cache:"no-store"});
+  const data=await response.json().catch(()=>({}));
+  gate.classList.toggle("hidden",Boolean(response.ok&&data.authenticated));
+  if(!response.ok)setMessage("ownerLoginMessage",data.error||"Owner session unavailable.");
+ }catch{gate.classList.remove("hidden");setMessage("ownerLoginMessage","Could not check your session. Refresh and try again.");}
+}
+if($("ownerLoginForm"))$("ownerLoginForm").addEventListener("submit",async event=>{
+ event.preventDefault();const button=$("ownerLoginButton");button.disabled=true;button.textContent="Signing in…";setMessage("ownerLoginMessage","");
+ try{
+  const response=await fetch("/api/session",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({password:$("ownerPassword").value})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok||!data.authenticated)throw new Error(data.error||"Sign-in failed.");
+  $("ownerPassword").value="";$("ownerGate").classList.add("hidden");toast("Signed in to your private workspace.");
+ }catch(error){setMessage("ownerLoginMessage",error.message||"Sign-in failed.");}
+ finally{button.disabled=false;button.textContent="Sign in";}
+});
+if($("ownerLogout"))$("ownerLogout").addEventListener("click",async()=>{
+ try{await fetch("/api/session",{method:"DELETE",headers:{"Accept":"application/json"}});}catch{}
+ $("ownerGate")?.classList.remove("hidden");setMessage("ownerLoginMessage","You have signed out.");$("ownerPassword")?.focus();
+});
+ownerSessionRefresh();

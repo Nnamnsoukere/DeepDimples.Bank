@@ -1,0 +1,8 @@
+{
+  "name": "deepdimples-bank",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check app.js && for file in api/*.js lib/*.js; do node --check \"$file\" || exit 1; done"
+  }
+}
