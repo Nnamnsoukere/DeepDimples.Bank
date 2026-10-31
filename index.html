@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06241B">
+<meta name="description" content="DeepDimples Bank personal crypto and finance dashboard">
+<title>DeepDimples Bank</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
+<style>
+/* Naira Green Luxe: emerald ground, cream banknote card, gold accent. Dark is the default, light is cream. */
+:root{--bg:#06241B;--card:#0C3226;--card2:#124233;--line:#235544;--text:#F3EBD3;--mute:#A9C7B8;--accent:#E3BE5E;--on-accent:#1A1405;--up:#6FE0AE;--down:#F0A39A;--mint:#6FE0AE;--wallet-bg:#F3EBD3;--wallet-fg:#0B2A20;--wallet-line:rgba(11,42,32,.38);--ctl:rgba(11,42,32,.08);--ring:rgba(11,42,32,.10);--display:'Bricolage Grotesque',system-ui,sans-serif;--body:'DM Sans',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+:root[data-theme=light]{--bg:#F6F1E3;--card:#FFFDF6;--card2:#EFE7CF;--line:#D9CFB0;--text:#0B2A20;--mute:#4B6558;--accent:#0F6B4A;--on-accent:#fff;--up:#0B7A52;--down:#B3372F;--mint:#0B7A52;--wallet-bg:#0B2A20;--wallet-fg:#F3EBD3;--wallet-line:rgba(243,235,211,.4);--ctl:rgba(243,235,211,.1);--ring:rgba(243,235,211,.08);color-scheme:light}
+*{box-sizing:border-box;margin:0}
+html,body{max-width:100%;overflow-x:hidden}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font:16px/1.45 var(--body);padding-top:env(safe-area-inset-top,0px)}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;transition:transform .12s ease}
+button:active{transform:scale(.97)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hidden{display:none!important}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{max-width:560px;margin:0 auto;padding:12px 16px calc(100px + env(safe-area-inset-bottom,0px))}
+
+/* header with optional photo/video background */
+.dash{position:relative;border-radius:26px;overflow:hidden;margin:0 0 14px;border:1px solid var(--line);background:linear-gradient(135deg,var(--card2),var(--card) 70%)}
+.dash-bg,.dash-shade{position:absolute;inset:0}
+.dash-bg img,.dash-bg video{width:100%;height:100%;object-fit:cover;display:block}
+.dash-shade{display:none;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.2) 55%,rgba(0,0,0,.6))}
+.dash-in{position:relative;padding:8px 14px 12px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0 8px}
+.profile{display:flex;align-items:center;gap:10px;text-align:left;min-height:44px;min-width:0;flex:1 1 auto}
+.profile>div:last-child{min-width:0}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--display);font-weight:700;overflow:hidden;flex:none;box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--accent)}
+.avatar video,.avatar img{width:100%;height:100%;object-fit:cover}
+.profile strong{display:block;line-height:1.2;font-family:var(--display);font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-actions{display:flex;gap:6px;flex:none}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center}
+.icon-btn .ic{width:16px;height:16px}
+.dash .search{margin:4px 0 0;display:flex;gap:8px}
+.dash .search input{flex:1;min-width:0}
+.search input{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+#searchGo{flex:none;padding:10px 20px}
+.dash.has-bg{min-height:200px}
+.dash.has-bg .dash-shade{display:block}
+.dash.has-bg .profile strong{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.dash.has-bg .icon-btn{color:#fff;border-color:rgba(255,255,255,.45);background:rgba(0,0,0,.35)}
+
+.results{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;margin:0 0 14px;padding:10px;border:1px solid var(--accent);border-radius:20px;background:var(--card)}
+.results .asset{background:var(--bg)}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0}
+#resBody{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0}
+.tkimg{width:36px;height:36px;border-radius:50%;flex:none;object-fit:cover;background:var(--card2)}
+.results .xl-fb{width:36px;height:36px;border-radius:50%}
+
+h1{font:700 32px/1.08 var(--display);letter-spacing:-.02em}
+h2{font:700 21px/1.2 var(--display);letter-spacing:-.01em}
+h3{font:700 18px/1.2 var(--display)}
+.hero{margin:6px 0 16px}
+.hero p{font-size:13px;color:var(--accent);font-weight:700;margin-bottom:4px}
+h1.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap;line-height:1}
+.bn{font:700 36px/1.05 var(--display);letter-spacing:-.03em;color:var(--text)}
+.bk{font-size:12.5px;font-weight:700;letter-spacing:.42em;text-transform:uppercase;padding:6px 6px 6px 12px;border:1.5px solid var(--accent);border-radius:8px;color:var(--accent)}
+
+.chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:2px 0 16px}
+.chips button{display:grid;gap:6px;place-items:center;padding:10px 2px;font-size:12.5px;font-weight:700;border-radius:18px;border:1px solid var(--line);background:var(--card);min-height:44px}
+.chips .ci{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--accent);color:var(--accent);font:700 15px var(--display)}
+.chips .ci .ic{width:18px;height:18px}
+
+/* wallet: cream banknote with guilloche rings and the dimple orb */
+.wallet{position:relative;overflow:hidden;background:var(--wallet-bg);color:var(--wallet-fg);border-radius:28px;padding:20px}
+.wallet::before{content:"";position:absolute;right:-70px;top:-70px;width:260px;height:260px;border-radius:50%;background:repeating-radial-gradient(circle,var(--ring) 0 1px,transparent 1px 7px);pointer-events:none}
+.wallet>*{position:relative}
+.orb{position:relative;flex:none;width:48px;height:48px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#F8DC96,#E3BE5E 40%,#9A6240 78%,#3A2330);box-shadow:0 0 30px rgba(227,190,94,.45),inset -6px -8px 14px rgba(0,0,0,.3);animation:bob 6s ease-in-out infinite}
+.orb i{position:absolute;top:28px;left:10px;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 65% 70%,rgba(255,236,190,.35),rgba(90,45,30,.6) 75%);box-shadow:inset 1px 2px 3px rgba(0,0,0,.5)}
+.orb i+i{left:29px}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.wallet-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.wallet-top button{color:inherit;display:grid;place-items:center end;width:44px;height:44px;margin:-10px 0}
+.wallet-value{font:700 32px/1.1 var(--display);margin:6px 0 4px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.wallet-value:empty,.wallet-sub:empty{display:none}
+.wallet-sub{font-size:13px;opacity:.8}
+.wallet-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.wallet-row label{font-size:13px;opacity:.9}
+select{background:var(--ctl);border:1px solid var(--wallet-line);border-radius:10px;padding:6px 8px;color:inherit}
+select option{color:#111}
+.btn{border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:700;min-height:44px}
+.wallet .btn{border-color:var(--wallet-line);margin-top:14px}
+#watchWallet{width:100%;font-size:26px;line-height:1;padding:8px 14px}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.note{font-size:12.5px;color:var(--mute);margin-top:8px;overflow-wrap:anywhere}
+.note:empty{display:none}
+.wallet .note{color:inherit;opacity:.72}
+
+.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;text-align:left}
+.summary .card{min-width:0;overflow-wrap:anywhere}
+.summary .card strong{display:block;font:700 18px var(--display);margin:4px 0;font-variant-numeric:tabular-nums}
+.summary small,.summary .t{font-size:12.5px;color:var(--mute)}
+.summary .card:nth-child(2){border-color:var(--accent)}
+.summary .card:nth-child(2) .t{color:var(--accent);font-weight:700}
+.actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:6px}
+.actions button{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:12px 4px;display:grid;gap:6px;place-items:center;font-size:13px;font-weight:700}
+.actions span{width:44px;height:44px;border-radius:50%;border:1px solid var(--accent);display:grid;place-items:center;color:var(--accent)}
+
+.sec>div{min-width:0}
+.sec{display:flex;justify-content:space-between;align-items:flex-end;margin:30px 0 12px;scroll-margin-top:16px;border-left:4px solid var(--accent);padding-left:12px}
+.sec p{font-size:11.5px;color:var(--accent);font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+#markets,#p2p{border-left-color:var(--mint)}
+#markets p,#p2p p{color:var(--mint)}
+.link{color:var(--accent);font-weight:700;font-size:14px;min-height:44px}
+#markets .link,#p2p .link{color:var(--mint)}
+
+.assets{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.asset{--c:var(--accent);display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:18px;padding:12px}
+.asset[data-id=bitcoin]{--c:#f7931a}.asset[data-id=ethereum]{--c:#8c9bff}.asset[data-id=solana]{--c:#14f195}.asset[data-id=binancecoin]{--c:#f3ba2f}.asset[data-id=tether]{--c:#26a17b}
+.asset img,.asset .xl,.asset .ab{flex:none}
+.asset img{width:36px;height:36px;border-radius:50%;flex:none}
+.asset .info{flex:1 1 72px;min-width:0;overflow-wrap:anywhere}
+.asset .info .link{max-width:100%;min-height:0;white-space:normal;text-align:left;overflow-wrap:anywhere}
+.asset .price{margin-left:auto}
+.asset .info small{color:var(--mute)}
+.asset .price{flex:0 1 auto;min-width:0;max-width:48%;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.asset .price small{display:block;color:var(--mute);font-size:12px}
+.chg{flex:none;max-width:34%;overflow-wrap:anywhere;min-width:64px;text-align:right;font-weight:700;font-size:14px;color:var(--mute)}
+.chg.up,.chg.down{border-radius:99px;padding:4px 10px;min-width:0}
+.chg.up{color:var(--up);background:rgba(111,224,174,.14)}
+.chg.down{color:var(--down);background:rgba(240,163,154,.14)}
+:root[data-theme=light] .chg.up{background:rgba(11,122,82,.1)}
+:root[data-theme=light] .chg.down{background:rgba(179,55,47,.1)}
+.ab{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:700;font-size:19px;color:var(--c);border:1.5px solid var(--c);background:var(--bg)}
+.empty{text-align:center;padding:26px 16px;background:var(--card);border:1.5px dashed var(--line);border-radius:20px}
+.empty b{display:block;margin-bottom:4px;font-family:var(--display);font-size:17px}
+.empty p{font-size:14px;color:var(--mute)}
+.addr{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:14px;margin-top:8px;font-size:14px}
+.addr button{color:var(--down);font-weight:700;font-size:13px;min-height:36px}
+
+/* asset constellation: holdings as bubbles sized by value */
+.const{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;padding:18px;margin-top:10px;background:radial-gradient(circle at 50% 50%,var(--card2),var(--card) 72%);border:1px solid var(--line);border-radius:26px}
+.bub{border-radius:50%;display:grid;place-items:center;font:700 12px var(--display);text-align:center;overflow:hidden;padding:2px;max-width:100%;box-shadow:0 0 24px rgba(0,0,0,.25)}
+.b0{background:radial-gradient(circle at 35% 30%,#2A9468,#0E4A36);color:#F3EBD3}
+.b1{background:radial-gradient(circle at 35% 30%,#F4D27A,#B98A1E);color:#1A1405}
+.b2{background:radial-gradient(circle at 35% 30%,#7EE6B5,#2A9468);color:#06251C}
+.b3{background:radial-gradient(circle at 35% 30%,#4DA48E,#1D5F50);color:#F3EBD3}
+.b4{background:radial-gradient(circle at 35% 30%,#F8F1DA,#CFC39A);color:#0B2A20}
+
+/* p2p with radar */
+.card.p2p{border-color:var(--mint)}
+.p2p .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.p2p .row label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+.p2p select{background:var(--bg);border-color:var(--line);color:var(--text)}
+.p2p select option{color:inherit}
+.radar{position:relative;width:176px;height:176px;margin:14px auto 8px;border-radius:50%;background:radial-gradient(circle,var(--card2),var(--card));border:1px solid var(--line);overflow:hidden}
+.radar .sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 280deg,rgba(111,224,174,.4) 359deg,transparent 360deg);animation:spin 5s linear infinite}
+.radar .ring{position:absolute;inset:28px;border-radius:50%;border:1px solid var(--line)}
+.radar .ring.r2{inset:56px}
+.radar .core{position:absolute;left:82px;top:82px;width:12px;height:12px;border-radius:50%;background:var(--text)}
+.radar .blip{position:absolute;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700}
+.radar .blip::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.radar .b1p{left:96px;top:36px}.radar .b2p{left:30px;top:76px}.radar .b3p{left:86px;top:132px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prov{display:grid;gap:8px;margin-top:10px}
+.prov a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;min-height:56px;border:1px solid var(--line);border-radius:16px;color:var(--text);text-decoration:none;font-weight:700;background:var(--bg)}
+.prov a>span{color:var(--accent)}
+.xl{width:32px;height:32px;border-radius:10px;background:#fff;object-fit:contain;padding:3px;flex:none}
+.xl-fb{display:inline-grid;place-items:center;background:var(--card2);color:var(--accent);font-weight:700;padding:0;border:1.5px solid var(--accent)}
+.xrow{display:inline-flex;align-items:center;gap:10px;font-style:normal}
+div.xrow{display:flex;margin-top:2px}
+.best{display:grid;gap:2px;text-align:center;padding:14px;margin-top:12px;border:1.5px solid var(--accent);border-radius:18px;background:var(--bg)}
+.best b{font:700 30px/1.15 var(--display);color:var(--accent);overflow-wrap:anywhere}
+.best small{color:var(--mute);font-size:13px}
+.pcard{margin-top:12px;background:var(--bg)}
+.offer{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:3px 12px;padding:10px 12px;margin-top:8px;border:1px solid var(--line);border-radius:14px}
+.offer .op{min-width:0;overflow-wrap:anywhere}
+.offer .op b{font-size:18px;font-variant-numeric:tabular-nums}
+.offer .op small,.offer .lim{color:var(--mute);font-size:12.5px}
+.offer .mer{font-weight:700;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw;min-width:0}
+.offer .lim{grid-column:1/-1;overflow-wrap:anywhere}
+
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{display:grid;place-items:center;gap:2px;font-size:11px;font-weight:500;color:var(--mute);padding:4px 10px;min-width:56px;min-height:44px}
+nav button.on{color:var(--accent)}
+dialog{border:1px solid var(--accent);border-radius:22px;background:var(--card);color:var(--text);padding:20px;width:min(92vw,420px);max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);max-height:calc(100vh - 24px);overflow-y:auto;overflow-x:hidden}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog form{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+dialog label{font-size:13px;color:var(--mute)}
+dialog input[type=text],dialog input:not([type]){padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--on-accent);padding:10px 16px;border-radius:14px;font-size:14px;font-weight:500;max-width:calc(100vw - 32px);opacity:0;pointer-events:none;transition:.2s;z-index:10;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.cf{position:fixed;top:-16px;width:8px;height:14px;border-radius:2px;z-index:20;pointer-events:none;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(108vh) rotate(540deg)}}
+@media (hover:hover){.asset,.card{transition:transform .15s ease}.asset:hover,.card:hover{transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.radar .sweep,.orb{animation:none}.cf{display:none}}
+
+/* social links */
+.bi{width:20px;height:20px;fill:currentColor;flex:none}
+.socials{display:flex;gap:12px;margin-top:16px}
+.soc{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--text);background:var(--card);border:1.5px solid var(--accent);text-decoration:none;cursor:pointer;transition:transform .12s ease}
+.soc:active{transform:scale(.94)}
+.soc.unset{border-style:dashed;border-color:var(--line);color:var(--mute)}
+.socin{display:flex;align-items:center;gap:10px}
+.socin .bi{width:24px;height:24px;color:var(--accent)}
+.socin input{flex:1;min-width:0}
+dialog input[type=text]{padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+#socMsg{color:var(--down);font-weight:600}
+#socMsg:empty{display:none}
+
+.wallet-top{align-items:flex-start}
+.wtr{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.reveal{display:inline-flex;align-items:center;gap:8px;min-height:36px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.reveal .ic{width:18px;height:18px}
+
+.radar .blip::before{display:none}
+.xl.xs{width:18px;height:18px;border-radius:6px;padding:1px;box-shadow:0 0 10px rgba(227,190,94,.5)}
+.xl-fb.xs{font-size:10px;border-width:1px}
+
+.socials{gap:10px;margin-top:14px}
+.soc{width:34px;height:34px;border-width:1.5px}
+.soc .bi{width:15px;height:15px}
+.socin .bi{width:20px;height:20px}
+
+/* smaller social icons in their real colours */
+.socials{gap:12px;margin-top:14px}
+.soc{position:relative;width:28px;height:28px}
+.soc::after{content:"";position:absolute;inset:-8px}
+.soc .bi{width:12px;height:12px}
+.bx{color:#fff}.btg{color:#26A5E4}.btt{overflow:visible}
+.tc{fill:#25F4EE}.tr{fill:#FE2C55}.tm{fill:#fff}
+:root[data-theme=light] .bx{color:#000}
+:root[data-theme=light] .tm{fill:#000}
+.soc[data-p=x]{border-color:rgba(255,255,255,.55)}
+:root[data-theme=light] .soc[data-p=x]{border-color:rgba(0,0,0,.55)}
+.soc[data-p=tt]{border-color:#25F4EE}
+.soc[data-p=tg]{border-color:#26A5E4}
+.soc.unset{opacity:.55;border-style:dashed}
+.soc.unset[data-p]{border-color:var(--line)}
+.socin .bx{color:#fff}
+:root[data-theme=light] .socin .bx{color:#000}
+.socin .btg{color:#26A5E4}
+
+/* profile name: smaller, in a book-style serif like Claude's replies */
+.profile strong{font-family:"Newsreader","Source Serif 4",Georgia,"Times New Roman",serif;font-size:14px;font-weight:500;letter-spacing:.005em}
+
+/* profile dashboard: black */
+.dash{background:#000;border-color:rgba(243,235,211,.18)}
+.dash-shade{background:linear-gradient(180deg,rgba(0,0,0,.74),rgba(0,0,0,.46) 55%,rgba(0,0,0,.8))}
+.dash .profile strong{color:#F3EBD3}
+.dash .icon-btn{color:#F3EBD3;background:#0a0a0a;border-color:rgba(243,235,211,.3)}
+.dash .search input{background:#0a0a0a;color:#F3EBD3;border:1px solid rgba(243,235,211,.3)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+  <symbol id="i-receive" viewBox="0 0 24 24"><path d="M17 7L7 17M15 17H7V9"/></symbol>
+  <symbol id="i-cash" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h4"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="16.5" cy="13.5" r="1.2"/></symbol>
+</svg>
+<div class="app">
+  <header class="dash" id="dash"><div class="dash-bg" id="dashBg" aria-hidden="true"></div><div class="dash-shade"></div><div class="dash-in"><div class="topbar">
+    <button class="profile" id="editProfile" aria-label="Edit profile">
+      <div class="avatar" id="avatar">DD</div>
+      <div><strong id="profileName">DeepDimples</strong></div>
+    </button>
+    <div class="top-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="Search"><svg class="ic"><use href="#i-search"/></svg></button>
+      <button class="icon-btn" id="notify" aria-label="Notifications"><svg class="ic"><use href="#i-bell"/></svg></button>
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle light mode"><svg class="ic"><use href="#i-sun"/></svg></button>
+    </div>
+  </div>
+    <div class="search hidden" id="searchWrap"><input id="searchInput" type="search" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Name, ticker or contract address" aria-label="Search tokens"><button type="button" class="btn solid" id="searchGo">Go</button></div>
+  </div></header>
+  <div class="results hidden" id="searchResults" aria-live="polite"><div class="rhead"><b>Search results</b><button type="button" class="link" id="closeResults">Close ✕</button></div><div id="resBody"></div></div>
+
+  <section class="hero">
+    <p id="greet">Welcome to the</p><h1 class="brand"><span class="bn">DeepDimples</span><span class="bk">Bank</span></h1>
+    <div class="socials" id="socials" aria-label="Social media links">
+      <a class="soc unset" data-p="x" title="X (Twitter)"><svg class="bi bx" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></a>
+      <a class="soc unset" data-p="tt" title="TikTok"><svg class="bi btt" viewBox="0 0 24 24" aria-hidden="true"><path class="tc" transform="translate(-1 -.8)" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/><path class="tr" transform="translate(1 .8)" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/><path class="tm" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
+      <a class="soc unset" data-p="tg" title="Telegram"><svg class="bi btg" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+    </div>
+  </section>
+
+  <div class="chips" role="navigation" aria-label="Jump to a section">
+    <button data-go="holdings"><span class="ci"><svg class="ic"><use href="#i-wallet"/></svg></span>Holdings</button>
+    <button data-go="markets"><span class="ci"><svg class="ic"><use href="#i-chart"/></svg></span>Markets</button>
+    <button data-go="activity"><span class="ci"><svg class="ic"><use href="#i-bolt"/></svg></span>Activity</button>
+    <button data-go="p2p"><span class="ci">₦</span>P2P</button>
+  </div>
+
+  <section class="wallet" id="home">
+    <div class="wallet-top"><span>Wallet overview</span><div class="wtr"><button id="hideBalance" aria-label="Hide balance"><svg class="ic"><use href="#i-eye"/></svg></button><div class="orb" aria-hidden="true"><i></i><i></i></div></div></div>
+    <div class="wallet-value" id="walletValue"></div>
+    <div class="wallet-sub" id="walletSub"></div>
+    <div class="wallet-row">
+      <label for="currency">Currency
+        <select id="currency">
+          <option>USD</option><option>EUR</option><option>GBP</option><option>NGN</option><option>BTC</option>
+        </select>
+      </label>
+    </div>
+    <button class="btn" id="watchWallet" aria-label="Add public wallet address" title="Add public wallet address">+</button>
+  </section>
+
+  <section class="summary">
+    <button class="card" data-go="activity"><span class="t">Activity</span><strong id="actSummary">—</strong><small id="actSub">No wallet connected</small></button>
+    <button class="card" data-go="markets"><span class="t">Market watch</span><strong id="marketSummary">Loading…</strong><small id="marketFresh">Fetching prices</small></button>
+  </section>
+
+  <section class="actions" aria-label="Quick actions">
+    <button data-note="Connect a wallet first. No transfer has been started."><span><svg class="ic"><use href="#i-send"/></svg></span>Send</button>
+    <button data-note="Choose a wallet and network before creating a receive address."><span><svg class="ic"><use href="#i-receive"/></svg></span>Receive</button>
+    <button data-note="Cash-outs happen through your exchange or P2P provider. Nothing was started."><span><svg class="ic"><use href="#i-cash"/></svg></span>Cash out</button>
+    <button data-note="No debit card is connected or issued here."><span><svg class="ic"><use href="#i-card"/></svg></span>Cards</button>
+  </section>
+
+  <div class="sec" id="holdings"><div><h2>Your holdings</h2></div><button class="link" id="refreshHold">Refresh ↻</button></div>
+  <section class="assets" id="holdingList"></section>
+  <div class="const hidden" id="constellation" role="img" aria-label="Your holdings drawn as bubbles. Bigger bubbles are bigger holdings."></div>
+  <div id="addrList"></div>
+  <p class="note hidden" id="holdStatus"></p>
+  <p class="note hidden" id="holdDiag"></p>
+
+  <div class="sec" id="markets"><div><p>Market watch</p><h2>Crypto assets</h2></div><button class="link" id="refreshPrices">Refresh ↻</button></div>
+  <section class="assets" id="assetList">
+    <div class="asset" data-s="bitcoin btc" data-id="bitcoin"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/btc.png" alt="Bitcoin logo"><div class="info"><b>Bitcoin</b><br><small>BTC</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+    <div class="asset" data-s="ethereum eth" data-id="ethereum"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/eth.png" alt="Ethereum logo"><div class="info"><b>Ethereum</b><br><small>ETH</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+    <div class="asset" data-s="solana sol" data-id="solana"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/sol.png" alt="Solana logo"><div class="info"><b>Solana</b><br><small>SOL</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+    <div class="asset" data-s="bnb binance" data-id="binancecoin"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/bnb.png" alt="BNB logo"><div class="info"><b>BNB</b><br><small>BNB</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+    <div class="asset" data-s="tether usdt" data-id="tether"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/usdt.png" alt="Tether logo"><div class="info"><b>Tether</b><br><small>USDT</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+  </section>
+  <p class="note" id="priceStatus">Prices load from CoinGecko. They are indicative market data, not executable quotes.</p>
+
+
+  <div class="sec" id="activity"><div><p>Your money moves</p><h2>All activity</h2></div><button class="link" id="refreshAct">Refresh ↻</button></div>
+  <section class="assets" id="actList"></section>
+  <button class="btn hidden" id="actMore" style="width:100%;margin-top:10px">Show more</button>
+  <p class="note" id="actStatus"></p>
+
+  <div class="sec" id="p2p"><div><p>Nigeria market</p><h2>NGN P2P rates</h2></div></div>
+  <section class="card p2p">
+    <b>Compare Nigerian P2P providers</b>
+    <div class="radar" aria-hidden="true">
+      <div class="sweep"></div><i class="ring"></i><i class="ring r2"></i><i class="core"></i>
+      <span class="blip b1p"><img class="xl xs" data-k="Bybit" src="https://www.google.com/s2/favicons?domain=bybit.com&sz=128" alt="" width="18" height="18" data-fb="B">Bybit</span><span class="blip b2p"><img class="xl xs" data-k="OKX" src="https://www.google.com/s2/favicons?domain=okx.com&sz=128" alt="" width="18" height="18" data-fb="O">OKX</span><span class="blip b3p"><img class="xl xs" data-k="Bitget" src="https://www.google.com/s2/favicons?domain=bitget.com&sz=128" alt="" width="18" height="18" data-fb="B">Bitget</span>
+    </div>
+    <div class="row">
+      <label>Asset<select id="p2pAsset"><option>USDT</option><option>USDC</option><option>BTC</option></select></label>
+      <label>I’m looking to<select id="p2pSide"><option>Buy crypto</option><option>Sell crypto</option></select></label>
+    </div>
+    <button class="btn solid" id="refreshP2P" style="width:100%">Check live rates</button>
+    <p class="note" id="p2pStatus">Pick an asset and tap Check live rates.</p>
+    <div id="p2pOut"></div>
+    <div class="prov">
+      <a href="https://www.okx.com/p2p-markets" target="_blank" rel="noopener noreferrer"><i class="xrow"><img class="xl" data-k="OKX" src="https://www.google.com/s2/favicons?domain=okx.com&sz=128" alt="" width="32" height="32" data-fb="O"><b>OKX P2P</b></i><span>Open</span></a>
+      <a href="https://www.bybit.com/fiat/trade/otc" target="_blank" rel="noopener noreferrer"><i class="xrow"><img class="xl" data-k="Bybit" src="https://www.google.com/s2/favicons?domain=bybit.com&sz=128" alt="" width="32" height="32" data-fb="B"><b>Bybit P2P</b></i><span>Open</span></a>
+      <a href="https://www.bitget.com/p2p-trade" target="_blank" rel="noopener noreferrer"><i class="xrow"><img class="xl" data-k="Bitget" src="https://www.google.com/s2/favicons?domain=bitget.com&sz=128" alt="" width="32" height="32" data-fb="B"><b>Bitget P2P</b></i><span>Open</span></a>
+    </div>
+    <button class="link" id="p2pInfo" style="margin-top:12px">How to use P2P safely</button>
+  </section>
+
+</div>
+
+<nav aria-label="Main navigation">
+  <button class="on" data-go="home"><svg class="ic"><use href="#i-home"/></svg>Home</button>
+  <button data-go="markets"><svg class="ic"><use href="#i-chart"/></svg>Markets</button>
+  <button data-go="activity"><svg class="ic"><use href="#i-bolt"/></svg>Activity</button>
+  <button id="navProfile"><svg class="ic"><use href="#i-gear"/></svg>Settings</button>
+</nav>
+
+<dialog id="profileDialog">
+  <form method="dialog" id="profileForm">
+    <h2>Edit profile</h2>
+    <label for="nick">Nickname</label>
+    <input id="nick" maxlength="32" placeholder="Your nickname">
+    <label>Profile picture or video</label>
+    <div class="pick">
+      <button type="button" class="btn" id="avCam">Take photo</button>
+      <button type="button" class="btn" id="avVid">Record video</button>
+      <button type="button" class="btn" id="avLib">Gallery</button>
+    </div>
+    <button type="button" class="link" id="avDel" style="text-align:left">Remove picture</button>
+    <label>Header background</label>
+    <div class="pick">
+      <button type="button" class="btn" id="bgLib">Image or video</button>
+      <button type="button" class="btn" id="bgCam">Take photo</button>
+    </div>
+    <button type="button" class="link" id="bgDel" style="text-align:left">Remove background</button>
+    <label>Social media</label>
+    <div class="socin"><svg class="bi bx" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><input type="text" id="socx" maxlength="80" placeholder="X username" aria-label="X (Twitter) username" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+    <div class="socin"><svg class="bi btt" viewBox="0 0 24 24" aria-hidden="true"><path class="tc" transform="translate(-1 -.8)" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/><path class="tr" transform="translate(1 .8)" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/><path class="tm" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><input type="text" id="soctt" maxlength="80" placeholder="TikTok username" aria-label="TikTok username" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+    <div class="socin"><svg class="bi btg" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg><input type="text" id="soctg" maxlength="80" placeholder="Telegram username" aria-label="Telegram username" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+    <p class="note" id="socMsg"></p>
+    <p class="note">Type just the username, with or without @. The links are built for you. Saved on this device only.</p>
+    <div class="dlg-actions"><button type="button" class="btn" id="cancelProfile">Close</button><button type="submit" class="btn solid">Save name</button></div>
+    <p class="note">Pictures and videos apply as soon as you pick them and stay on this device only. Videos play muted on a loop, so keep them under 25 MB.</p>
+  </form>
+  <input type="file" id="fAvCam" accept="image/*" capture="user" hidden>
+  <input type="file" id="fAvVid" accept="video/*" capture="user" hidden>
+  <input type="file" id="fAvLib" accept="image/*,video/*" hidden>
+  <input type="file" id="fBgLib" accept="image/*,video/*" hidden>
+  <input type="file" id="fBgCam" accept="image/*" capture="environment" hidden>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var store={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+  /* toast */
+  var tt;function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show')},2800)}
+  $$('[data-note]').forEach(function(b){b.addEventListener('click',function(){toast(b.dataset.note)})});
+  $('#notify').addEventListener('click',function(){toast('No notifications yet.')});
+  $('#p2pInfo').addEventListener('click',function(){toast('Trade only with verified merchants, pay from your own account, and release crypto only after the money lands.')});
+
+  /* theme */
+  function setTheme(t){document.documentElement.dataset.theme=t;store.set('dd-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='light'?'#F6F1E3':'#06241B'}
+  setTheme(store.get('dd-theme')||'dark');
+  $('#themeToggle').addEventListener('click',function(){setTheme(document.documentElement.dataset.theme==='light'?'dark':'light')});
+
+  /* time-of-day greeting */
+  (function(){var h=new Date().getHours();$('#greet').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+'. Welcome to the'})();
+  /* confetti, used the first time an address is added */
+  function confetti(){
+    if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+    var cols=['#E3BE5E','#6FE0AE','#F3EBD3','#F0A39A'],wrap=document.createElement('div');
+    for(var i=0;i<28;i++){var c=document.createElement('i');c.className='cf';c.style.left=(Math.random()*100)+'vw';c.style.background=cols[i%4];c.style.animationDelay=(Math.random()*.4)+'s';c.style.animationDuration=(1.2+Math.random()*.9)+'s';wrap.appendChild(c)}
+    document.body.appendChild(wrap);setTimeout(function(){wrap.remove()},2600);
+  }
+
+  /* search: local filter + live token search (DexScreener) */
+  var stimer,sseq=0;
+  function compact(n){return n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(Math.round(n))}
+  function tiny(v){if(!(v>0))return '0';if(v>=1)return v.toLocaleString(undefined,{maximumFractionDigits:2});var d=Math.min(12,Math.max(2,3-Math.floor(Math.log10(v))));return v.toFixed(d)}
+  var CH={solana:'Solana',ethereum:'Ethereum',bsc:'BNB Chain',base:'Base',arbitrum:'Arbitrum',polygon:'Polygon',avalanche:'Avalanche',optimism:'Optimism',sui:'Sui',ton:'TON',tron:'Tron'};
+  function cut(t,n){t=String(t||'');return t.length>n?t.slice(0,n-1)+'…':t}
+  function resultRow(p,l){
+    var t=p.baseToken,row=el('div','asset'),info=el('div','info'),pr=el('div','price'),px=parseFloat(p.priceUsd),ch=p.priceChange&&p.priceChange.h24;
+    var sym=cut(t.symbol||'?',12),addr=String(t.address||''),img=p.info&&p.info.imageUrl,ic;
+    row.style.cursor='pointer';
+    function badge(){return el('span','xl xl-fb',sym.charAt(0).toUpperCase())}
+    if(typeof img==='string'&&img.indexOf('https://')===0){ic=new Image(36,36);ic.className='tkimg';ic.alt='';ic.src=img;ic.addEventListener('error',function(){ic.replaceWith(badge())})}
+    else ic=badge();
+    info.appendChild(el('b',null,sym));info.appendChild(document.createElement('br'));
+    info.appendChild(el('small',null,cut(t.name,26)+' · '+(CH[p.chainId]||cut(p.chainId,12))+(l<1000?' · low liquidity':'')));
+    var cp=el('button','link','Copy contract');cp.style.cssText='display:block;font-size:12px;font-weight:600';
+    cp.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(navigator.clipboard)navigator.clipboard.writeText(addr).then(function(){toast('Contract address copied.')},function(){toast('Couldn’t copy. Open the token page to copy it.')});else toast('Couldn’t copy. Open the token page to copy it.');
+    });
+    info.appendChild(cp);
+    pr.appendChild(el('b',null,px>0?'$'+tiny(px):'—'));pr.appendChild(el('small',null,'Liq $'+compact(l)));
+    var c=el('span','chg',typeof ch==='number'?(ch>=0?'+':'')+ch.toFixed(1)+'%':'—');
+    if(typeof ch==='number')c.className='chg '+(ch>=0?'up':'down');
+    row.appendChild(ic);row.appendChild(info);row.appendChild(pr);row.appendChild(c);
+    row.addEventListener('click',function(){if(typeof p.url==='string'&&p.url.indexOf('https://dexscreener.com/')===0)window.open(p.url,'_blank','noopener')});
+    return row;
+  }
+  function runSearch(q){
+    var wrap=$('#searchResults'),box=$('#resBody'),my=++sseq,isAddr=/^0x[0-9a-fA-F]{40}$/.test(q)||/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(q);
+    wrap.classList.remove('hidden');box.textContent='';box.appendChild(el('p','note','Searching…'));
+    tfetch('https://api.dexscreener.com/latest/dex/search?q='+encodeURIComponent(q)).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){
+      if(my!==sseq)return;
+      var best={};
+      (j.pairs||[]).forEach(function(p){
+        if(!p.baseToken)return;
+        var k=p.chainId+':'+p.baseToken.address,l=(p.liquidity&&p.liquidity.usd)||0;
+        if(!best[k]||l>best[k].l)best[k]={l:l,p:p};
+      });
+      var all=Object.keys(best).map(function(k){return best[k]}).sort(function(a,b){return b.l-a.l});
+      var list=(isAddr?all:all.filter(function(x){return x.l>=500})).slice(0,8);
+      box.textContent='';
+      if(!list.length){box.appendChild(el('p','note',all.length?'Only tokens with very little liquidity matched. Paste the full contract address to see them.':'No tokens found. Try the full name, the ticker or the contract address.'));return}
+      list.forEach(function(x){box.appendChild(resultRow(x.p,x.l))});
+      box.appendChild(el('p','note','Tap a token to open it. Scam tokens copy real names, so check the contract before you buy.'));
+    }).catch(function(){
+      if(my!==sseq)return;
+      box.textContent='';box.appendChild(el('p','note','Search isn’t available right now. Check your connection and try again.'));
+    });
+  }
+  function clearSearch(){
+    $('#searchInput').value='';sseq++;
+    $('#searchResults').classList.add('hidden');$('#resBody').textContent='';
+    $$('.asset[data-s]').forEach(function(r){r.classList.remove('hidden')});
+  }
+  $('#searchToggle').addEventListener('click',function(){
+    var w=$('#searchWrap');w.classList.toggle('hidden');
+    if(w.classList.contains('hidden'))clearSearch();else $('#searchInput').focus();
+  });
+  function closeSearch(){$('#searchWrap').classList.add('hidden');clearSearch()}
+  $('#closeResults').addEventListener('click',closeSearch);
+  function goSearch(){
+    var q=$('#searchInput').value.trim();
+    if(q.length<2){toast('Type at least 2 characters, then tap Go.');return}
+    runSearch(q);$('#searchInput').blur();
+  }
+  $('#searchGo').addEventListener('click',goSearch);
+  $('#searchInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();goSearch()}else if(e.key==='Escape'){closeSearch()}});
+  $('#searchInput').addEventListener('input',function(e){
+    var q=e.target.value.trim(),ql=q.toLowerCase();
+    $$('.asset[data-s]').forEach(function(r){r.classList.toggle('hidden',!!ql&&r.dataset.s.indexOf(ql)<0)});
+    if(q.length<2){sseq++;$('#searchResults').classList.add('hidden');$('#resBody').textContent=''}
+  });
+
+  /* profile picture + header background (stored on this device) */
+  var idb=null,urls=[];
+  function db(){
+    if(!idb)idb=new Promise(function(res,rej){
+      try{var rq=indexedDB.open('dd-media',1);
+        rq.onupgradeneeded=function(){rq.result.createObjectStore('m')};
+        rq.onsuccess=function(){res(rq.result)};rq.onerror=function(){rej(rq.error)};
+      }catch(e){rej(e)}
+    });
+    return idb;
+  }
+  function mput(k,v){return db().then(function(d){return new Promise(function(res,rej){var t=d.transaction('m','readwrite');t.objectStore('m').put(v,k);t.oncomplete=res;t.onerror=function(){rej(t.error)}})})}
+  function mget(k){return db().then(function(d){return new Promise(function(res,rej){var r=d.transaction('m').objectStore('m').get(k);r.onsuccess=function(){res(r.result||null)};r.onerror=function(){rej(r.error)}})})}
+  function mdel(k){return db().then(function(d){return new Promise(function(res,rej){var t=d.transaction('m','readwrite');t.objectStore('m').delete(k);t.oncomplete=res;t.onerror=function(){rej(t.error)}})})}
+  function mediaNode(rec){
+    var u=URL.createObjectURL(rec.blob);urls.push(u);
+    if(rec.kind==='video'){
+      var v=document.createElement('video');v.src=u;v.muted=true;v.defaultMuted=true;v.loop=true;v.autoplay=true;v.playsInline=true;
+      v.setAttribute('playsinline','');v.setAttribute('muted','');
+      var pl=v.play();if(pl&&pl.catch)pl.catch(function(){});
+      return v;
+    }
+    var i=new Image();i.alt='';i.src=u;return i;
+  }
+  function applyProfile(){
+    var n=store.get('dd-nick')||'DeepDimples',a=$('#avatar'),bg=$('#dashBg'),dash=$('#dash');
+    $('#profileName').textContent=n;
+    urls.forEach(function(u){URL.revokeObjectURL(u)});urls=[];
+    a.textContent=n.slice(0,2).toUpperCase();bg.textContent='';dash.classList.remove('has-bg');
+    mget('avatar').then(function(r){if(r){a.textContent='';a.appendChild(mediaNode(r))}}).catch(function(){});
+    mget('banner').then(function(r){if(r){bg.appendChild(mediaNode(r));dash.classList.add('has-bg')}}).catch(function(){});
+  }
+  function loadImg(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),i=new Image();i.onload=function(){URL.revokeObjectURL(u);res(i)};i.onerror=function(){URL.revokeObjectURL(u);rej(new Error('img'))};i.src=u})}
+  function prepare(file,slot){
+    if(file.type.indexOf('video/')===0){
+      if(file.size>25*1024*1024)return Promise.reject(new Error('That video is over 25 MB. Pick a shorter one.'));
+      return Promise.resolve({blob:file,kind:'video'});
+    }
+    return loadImg(file).then(function(img){
+      var cv=document.createElement('canvas');
+      if(slot==='avatar'){var s=Math.min(img.width,img.height);cv.width=cv.height=256;cv.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,256,256)}
+      else{var w=Math.min(1200,img.width),h=Math.round(img.height*w/img.width);cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h)}
+      return new Promise(function(res){cv.toBlob(function(b){res({blob:b,kind:'image'})},'image/jpeg',0.85)});
+    });
+  }
+  function bindPick(btn,input,slot){
+    $(btn).addEventListener('click',function(){$(input).click()});
+    $(input).addEventListener('change',function(e){
+      var f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+      prepare(f,slot).then(function(rec){return mput(slot,rec)}).then(function(){applyProfile();toast(slot==='avatar'?'Profile picture updated.':'Header background updated.')}).catch(function(err){
+        toast(err&&/MB/.test(err.message)?err.message:'Couldn’t use that file. Try a different one.');
+      });
+    });
+  }
+  bindPick('#avCam','#fAvCam','avatar');bindPick('#avVid','#fAvVid','avatar');bindPick('#avLib','#fAvLib','avatar');
+  bindPick('#bgLib','#fBgLib','banner');bindPick('#bgCam','#fBgCam','banner');
+  $('#avDel').addEventListener('click',function(){mdel('avatar').then(function(){applyProfile();toast('Picture removed.')}).catch(function(){})});
+  $('#bgDel').addEventListener('click',function(){mdel('banner').then(function(){applyProfile();toast('Background removed.')}).catch(function(){})});
+  applyProfile();
+  var dlg=$('#profileDialog');
+  function openProfile(focus){
+    $('#nick').value=store.get('dd-nick')||'';
+    Object.keys(SOC).forEach(function(p){$('#soc'+p).value=store.get('dd-soc-'+p)||''});
+    $('#socMsg').textContent='';dlg.showModal();
+    if(typeof focus==='string'){setTimeout(function(){var f=$(focus);if(f)f.focus()},60)}
+  }
+  $('#editProfile').addEventListener('click',openProfile);
+  $('#navProfile').addEventListener('click',openProfile);
+  $('#cancelProfile').addEventListener('click',function(){dlg.close()});
+  $('#profileForm').addEventListener('submit',function(e){
+    var vals={},bad='';
+    Object.keys(SOC).forEach(function(p){
+      var u=cleanUser($('#soc'+p).value);
+      if(u&&!SOC[p].re.test(u)&&!bad)bad=SOC[p].label+': that username doesn’t look right. '+SOC[p].hint;
+      vals[p]=u;
+    });
+    if(bad){e.preventDefault();$('#socMsg').textContent=bad;return}
+    Object.keys(vals).forEach(function(p){store.set('dd-soc-'+p,vals[p])});
+    store.set('dd-nick',$('#nick').value.trim());applyProfile();renderSocials();toast('Profile saved.');
+  });
+
+  /* social links: only a username is needed, the link is built from it */
+  var SOC={
+    x:{label:'X (Twitter)',hint:'Use 1 to 15 letters, numbers or underscores.',re:/^[A-Za-z0-9_]{1,15}$/,url:function(u){return 'https://x.com/'+u}},
+    tt:{label:'TikTok',hint:'Use 2 to 24 letters, numbers, dots or underscores.',re:/^[A-Za-z0-9._]{2,24}$/,url:function(u){return 'https://www.tiktok.com/@'+u}},
+    tg:{label:'Telegram',hint:'Use 5 to 32 letters, numbers or underscores, starting with a letter.',re:/^[A-Za-z][A-Za-z0-9_]{4,31}$/,url:function(u){return 'https://t.me/'+u}}
+  };
+  function cleanUser(v){
+    v=String(v||'').trim().replace(/[?#].*$/,'').replace(/\/+$/,'');
+    v=v.split('/').pop()||'';
+    return v.replace(/^@+/,'');
+  }
+  function renderSocials(){
+    $$('.soc').forEach(function(a){
+      var p=a.dataset.p,u=store.get('dd-soc-'+p)||'',c=SOC[p];
+      if(u&&c.re.test(u)){
+        a.href=c.url(u);a.target='_blank';a.rel='noopener noreferrer';a.classList.remove('unset');
+        a.setAttribute('aria-label',c.label+' @'+u);a.title=c.label+' @'+u;a.removeAttribute('role');a.removeAttribute('tabindex');
+      }else{
+        a.removeAttribute('href');a.removeAttribute('target');a.classList.add('unset');
+        a.setAttribute('aria-label','Add your '+c.label+' username');a.title='Add your '+c.label+' username';a.setAttribute('role','button');a.tabIndex=0;
+      }
+    });
+  }
+  function socialTap(a){if(!a.getAttribute('href'))openProfile('#soc'+a.dataset.p)}
+  $$('.soc').forEach(function(a){
+    a.addEventListener('click',function(e){if(!a.getAttribute('href')){e.preventDefault();socialTap(a)}});
+    a.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&!a.getAttribute('href')){e.preventDefault();socialTap(a)}});
+  });
+  renderSocials();
+
+  /* nav */
+  $$('[data-go]').forEach(function(b){b.addEventListener('click',function(){
+    var el=document.getElementById(b.dataset.go);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(b.closest('nav')){$$('nav button').forEach(function(x){x.classList.remove('on')});b.classList.add('on')}
+  })});
+
+  /* live prices */
+  var ids=['bitcoin','ethereum','solana','binancecoin','tether'],data=null;
+  var API='https://api.coingecko.com/api/v3/simple/price?ids='+ids.join(',')+'&vs_currencies=usd,eur,gbp,ngn&include_24hr_change=true';
+  function conv(id){
+    var c=$('#currency').value;
+    if(c==='BTC')return{v:data[id].usd/data.bitcoin.usd,c:'BTC'};
+    return{v:data[id][c.toLowerCase()],c:c};
+  }
+  function fmt(o){
+    if(o.c==='BTC')return o.v.toFixed(o.v<0.001?8:6)+' BTC';
+    return o.v.toLocaleString(undefined,{style:'currency',currency:o.c,maximumFractionDigits:o.v<1?4:2});
+  }
+  function fmtUsd(usd){
+    var c=$('#currency').value,r=c==='BTC'?1/data.bitcoin.usd:(c==='USD'?1:data.tether[c.toLowerCase()]/data.tether.usd);
+    return fmt({v:usd*r,c:c});
+  }
+  function render(){
+    if(!data)return;
+    $$('.asset[data-id]').forEach(function(r){
+      var d=data[r.dataset.id];if(!d)return;
+      r.querySelector('.price b').textContent=fmt(conv(r.dataset.id));
+      r.querySelector('.price small').textContent='Live price';
+      var ch=d.usd_24h_change,b=r.querySelector('.chg');
+      if(typeof ch==='number'){b.textContent=(ch>=0?'+':'')+ch.toFixed(2)+'%';b.className='chg '+(ch>=0?'up':'down')}
+    });
+    var t=new Date().toLocaleTimeString();
+    $('#marketSummary').textContent='BTC '+fmt(conv('bitcoin'));
+    $('#marketFresh').textContent='Updated '+t;
+    $('#priceStatus').textContent='Prices from CoinGecko, updated '+t+'. Indicative market data, not executable quotes.';
+    renderHoldings();
+  }
+  function load(){
+    return fetch(API).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){data=j;render()}).catch(function(){
+      $('#marketFresh').textContent='Feed unavailable';
+      $('#priceStatus').textContent='Couldn’t load prices. Wait a minute, then tap Refresh.';
+    });
+  }
+
+  /* wallets */
+  var SOL=['https://api.mainnet-beta.solana.com','https://solana-rpc.publicnode.com','https://solana.drpc.org'],
+      ETH=['https://ethereum-rpc.publicnode.com','https://cloudflare-eth.com'],
+      BSC=['https://bsc-rpc.publicnode.com','https://bsc-dataseed.binance.org'],
+      PROGS=['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA','TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'];
+  var DIAG={},H=[],hidden=false,loading=false,failedN=0;
+  function tfetch(u,o){o=o||{};var c=new AbortController(),t=setTimeout(function(){c.abort()},8000);o.signal=c.signal;return fetch(u,o).then(function(r){clearTimeout(t);return r},function(e){clearTimeout(t);throw e})}
+  function addrs(){try{return JSON.parse(store.get('dd-addrs')||'[]')}catch(e){return[]}}
+  function saveAddrs(a){store.set('dd-addrs',JSON.stringify(a))}
+  var oldW=store.get('dd-wallet');if(oldW&&!store.get('dd-addrs'))saveAddrs([oldW]);
+  function kindOf(a){
+    if(/^0x[0-9a-fA-F]{40}$/.test(a))return'evm';
+    if(/^bc1[0-9a-z]{20,80}$/.test(a)||/^[13][1-9A-HJ-NP-Za-km-z]{25,33}$/.test(a))return'btc';
+    if(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a))return'sol';
+    return null;
+  }
+  function short(a){return a.slice(0,6)+'…'+a.slice(-4)}
+  function rpc(urls,method,params){
+    var i=0;
+    function t(){
+      return tfetch(urls[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:method,params:params})})
+        .then(function(r){if(!r.ok)throw new Error('http');return r.json()})
+        .then(function(j){if(j.error)throw new Error('rpc');return j.result})
+        .catch(function(e){i++;if(i<urls.length)return t();throw e});
+    }
+    return t();
+  }
+  function fetchSol(a){
+    var out=[],d=DIAG[a]={sol:0,acc:0,tokErr:0};
+    var bal=rpc(SOL,'getBalance',[a]).then(function(r){d.sol=r.value/1e9;out.push({key:'SOL',sym:'SOL',name:'Solana',amount:r.value/1e9,cg:'solana'})});
+    var toks=Promise.all(PROGS.map(function(pid){
+      return rpc(SOL,'getTokenAccountsByOwner',[a,{programId:pid},{encoding:'jsonParsed'}]).then(function(r){
+        d.acc+=r.value.length;return r.value.map(function(v){var i=v.account.data.parsed.info;return{mint:i.mint,amount:i.tokenAmount.uiAmount||0}});
+      }).catch(function(){d.tokErr++;return[]});
+    }));
+    return Promise.all([bal,toks]).then(function(res){
+      var m={};res[1].forEach(function(arr){arr.forEach(function(t){if(t.amount>0)m[t.mint]=(m[t.mint]||0)+t.amount})});
+      var mints=Object.keys(m).slice(0,30);
+      if(!mints.length)return out;
+      return tfetch('https://api.dexscreener.com/tokens/v1/solana/'+mints.join(',')).then(function(r){return r.json()}).catch(function(){return[]}).then(function(pairs){
+        var best={};
+        (Array.isArray(pairs)?pairs:[]).forEach(function(p){
+          var b=p.baseToken&&p.baseToken.address;if(!b||!m[b])return;
+          var l=(p.liquidity&&p.liquidity.usd)||0;
+          if(!best[b]||l>best[b].l)best[b]={l:l,p:parseFloat(p.priceUsd),s:p.baseToken.symbol,n:p.baseToken.name};
+        });
+        mints.forEach(function(mt){
+          var b=best[mt];
+          out.push({key:mt,sym:b?b.s:mt.slice(0,4)+'…',name:b?b.n:'Unlisted token',amount:m[mt],px:(b&&b.l>=1000&&b.p>0)?b.p:null});
+        });
+        return out;
+      });
+    });
+  }
+  function fetchEvm(a){
+    function q(urls,sym,name,cg){return rpc(urls,'eth_getBalance',[a,'latest']).then(function(h){return{key:sym,sym:sym,name:name,amount:parseInt(h,16)/1e18,cg:cg}})}
+    return Promise.all([q(ETH,'ETH','Ethereum','ethereum'),q(BSC,'BNB','BNB','binancecoin')]);
+  }
+  function fetchBtc(a){
+    var u=['https://mempool.space/api/address/','https://blockstream.info/api/address/'],i=0;
+    function t(){
+      return tfetch(u[i]+a).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){
+        var c=j.chain_stats,m=j.mempool_stats;
+        var s=c.funded_txo_sum-c.spent_txo_sum+m.funded_txo_sum-m.spent_txo_sum;
+        return[{key:'BTC',sym:'BTC',name:'Bitcoin',amount:s/1e8,cg:'bitcoin'}];
+      }).catch(function(e){i++;if(i<u.length)return t();throw e});
+    }
+    return t();
+  }
+  function loadHoldings(){
+    loadActivity();
+    var list=addrs();
+    if(!list.length){H=[];renderHoldings();return}
+    $('#holdStatus').textContent='Checking balances…';
+    loading=true;renderHoldings();
+    var failed=0;
+    Promise.all(list.map(function(a){
+      var k=kindOf(a),p=k==='sol'?fetchSol(a):k==='evm'?fetchEvm(a):k==='btc'?fetchBtc(a):Promise.resolve([]);
+      return p.catch(function(){failed++;return[]});
+    })).then(function(all){
+      var m={};
+      all.forEach(function(arr){arr.forEach(function(h){
+        if(!(h.amount>0))return;
+        if(m[h.key])m[h.key].amount+=h.amount;else m[h.key]=h;
+      })});
+      H=Object.keys(m).map(function(k){return m[k]});
+      loading=false;failedN=failed;
+      renderHoldings();
+      $('#holdDiag').textContent=list.map(function(a){var d=DIAG[a];return d?short(a)+': '+d.sol+' SOL, '+d.acc+' token account(s) found'+(d.tokErr?' (token lookup failed on '+d.tokErr+' of 2 checks)':'')+'.':''}).filter(Boolean).join(' ');
+      $('#holdStatus').textContent=failed
+        ?failed+' of '+list.length+' address(es) couldn’t be checked. The free public nodes can be busy, so tap Refresh to retry.'
+        :'Updated '+new Date().toLocaleTimeString()+'. Token prices come from DexScreener and only show when a token has at least $1,000 of liquidity.';
+    });
+  }
+  function usdOf(h){
+    if(h.cg&&data&&data[h.cg])return h.amount*data[h.cg].usd;
+    if(h.px)return h.amount*h.px;
+    return null;
+  }
+  function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
+  var ICONS={SOL:'sol',BTC:'btc',ETH:'eth',BNB:'bnb',USDT:'usdt',USDC:'usdc'};
+  function renderConstellation(){
+    var cs=$('#constellation');cs.textContent='';
+    var items=[];
+    if(data&&!hidden)H.forEach(function(h){var u=usdOf(h);if(u!==null&&u>0)items.push({h:h,u:u})});
+    cs.classList.toggle('hidden',!items.length);
+    if(!items.length)return;
+    items.sort(function(a,b){return b.u-a.u});
+    var mx=items[0].u;
+    items.slice(0,8).forEach(function(x,i){
+      var s=Math.round(56+Math.sqrt(x.u/mx)*64),sym=String(x.h.sym||''),b=el('div','bub b'+(i%5),cut(sym,6)),ik=ICONS[sym.toUpperCase()];
+      b.style.width=b.style.height=s+'px';b.title=x.h.name;
+      if(ik){
+        var im=new Image();im.alt=sym;im.width=im.height=Math.round(s*0.58);
+        im.onload=function(){b.textContent='';b.appendChild(im)};
+        im.src='https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/'+ik+'.png';
+        b.setAttribute('aria-label',sym);
+      }
+      cs.appendChild(b);
+    });
+  }
+  function renderHoldings(){
+    var list=addrs(),box=$('#holdingList'),ab=$('#addrList');
+    box.textContent='';ab.textContent='';
+    list.forEach(function(a){
+      var row=el('div','addr'),rm=el('button',null,'Remove'),rv=el('button','reveal'),shown=false,tmr;
+      function paint(){
+        if(shown){rv.textContent=short(a);rv.setAttribute('aria-label','Hide wallet address')}
+        else{rv.innerHTML='<svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg>Tap to reveal';rv.setAttribute('aria-label','Tap to reveal wallet address')}
+      }
+      paint();
+      rv.addEventListener('click',function(){shown=!shown;clearTimeout(tmr);paint();if(shown)tmr=setTimeout(function(){shown=false;paint()},6000)});
+      row.appendChild(rv);row.appendChild(rm);
+      rm.addEventListener('click',function(){saveAddrs(addrs().filter(function(x){return x!==a}));loadHoldings();toast('Address removed.')});
+      ab.appendChild(row);
+    });
+    var total=0,any=false;
+    H.slice().sort(function(a,b){return (usdOf(b)||0)-(usdOf(a)||0)}).forEach(function(h){
+      var u=usdOf(h);if(u!==null&&data){total+=u;any=true}
+      var row=el('div','asset'),info=el('div','info'),pr=el('div','price');
+      info.appendChild(el('b',null,h.sym));info.appendChild(document.createElement('br'));info.appendChild(el('small',null,h.name));
+      pr.appendChild(el('b',null,hidden?'••••':(u!==null&&data?fmtUsd(u):'No price')));
+      pr.appendChild(el('small',null,hidden?'':h.amount.toLocaleString(undefined,{maximumFractionDigits:h.amount<1?6:2})));
+      row.appendChild(info);row.appendChild(pr);box.appendChild(row);
+    });
+    if(list.length&&!H.length)box.appendChild(el('div','empty','No balances found yet for the saved addresses.'));
+    if(!list.length)box.appendChild(el('div','empty','Add a public address to see balances here.'));
+    renderConstellation();
+    var wv;
+    if(hidden)wv='••••••';
+    else if(!list.length)wv='';
+    else if(loading)wv='Loading balances…';
+    else if(any&&data)wv='≈ '+fmtUsd(total);
+    else if(failedN&&!H.length)wv='Couldn’t load balances';
+    else if(!H.length)wv='No balances found';
+    else wv='No priced value yet';
+    $('#walletValue').textContent=wv;
+    $('#walletSub').textContent=list.length?'Watching '+list.length+' address'+(list.length>1?'es':'')+(failedN&&!loading?' · '+failedN+' failed, tap Refresh in Your holdings':''):'';
+  }
+  $('#hideBalance').addEventListener('click',function(){hidden=!hidden;renderHoldings()});
+  $('#watchWallet').addEventListener('click',function(){
+    var a=prompt('Paste a public wallet address (Solana, Ethereum/BNB or Bitcoin). Never a secret phrase or private key:');
+    if(a===null)return;a=a.trim();
+    if(!kindOf(a)){toast('That doesn’t look like a supported public address.');return}
+    var l=addrs();
+    if(l.indexOf(a)>=0){toast('That address is already added.');return}
+    if(l.length>=5){toast('You can watch up to 5 addresses.');return}
+    l.push(a);saveAddrs(l);renderHoldings();loadHoldings();toast('Address added.');if(l.length===1)confetti();
+  });
+  $('#refreshPrices').addEventListener('click',function(){load();loadHoldings();toast('Refreshing…')});
+  $('#refreshHold').addEventListener('click',function(){loadHoldings()});
+  $('#currency').addEventListener('change',render);
+  /* activity: all recent transactions for the saved addresses */
+  var ACT=[],actShown=20,actLoading=false,actFailed=0;
+  function rpcBatch(urls,batch){
+    var i=0;
+    function t(){
+      return tfetch(urls[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(batch)})
+        .then(function(r){if(!r.ok)throw new Error('http');return r.json()})
+        .then(function(j){if(!Array.isArray(j))throw new Error('rpc');return j})
+        .catch(function(e){i++;if(i<urls.length)return t();throw e});
+    }
+    return t();
+  }
+  function symbolize(items,mints){
+    if(!mints.length)return Promise.resolve(items);
+    return tfetch('https://api.dexscreener.com/tokens/v1/solana/'+mints.slice(0,30).join(',')).then(function(r){return r.json()}).catch(function(){return[]}).then(function(pairs){
+      var sm={};
+      (Array.isArray(pairs)?pairs:[]).forEach(function(p){if(p.baseToken&&!sm[p.baseToken.address])sm[p.baseToken.address]=String(p.baseToken.symbol||'').slice(0,12)});
+      items.forEach(function(it){if(it.mint)it.sym=sm[it.mint]||short(it.mint)});
+      return items;
+    });
+  }
+  function solActivity(a){
+    return rpc(SOL,'getSignaturesForAddress',[a,{limit:20}]).then(function(sigs){
+      if(!sigs.length)return[];
+      var batch=sigs.map(function(x,i){return{jsonrpc:'2.0',id:i,method:'getTransaction',params:[x.signature,{encoding:'jsonParsed',maxSupportedTransactionVersion:0}]}});
+      return rpcBatch(SOL,batch).then(function(res){
+        var items=[],mints={};
+        res.forEach(function(r){
+          var tx=r.result;if(!tx||!tx.meta||tx.meta.err)return;
+          var m=tx.meta,sig=sigs[r.id].signature,keys=tx.transaction.message.accountKeys,idx=-1,part=[],tok={},hasTok=false;
+          keys.forEach(function(k,i){if((k.pubkey||k)===a)idx=i});
+          var t=(tx.blockTime||sigs[r.id].blockTime||0)*1000;
+          (m.preTokenBalances||[]).forEach(function(b){if(b.owner===a)tok[b.mint]=(tok[b.mint]||0)-(b.uiTokenAmount.uiAmount||0)});
+          (m.postTokenBalances||[]).forEach(function(b){if(b.owner===a)tok[b.mint]=(tok[b.mint]||0)+(b.uiTokenAmount.uiAmount||0)});
+          Object.keys(tok).forEach(function(mt){var d=tok[mt];if(Math.abs(d)>1e-12){hasTok=true;mints[mt]=1;part.push({mint:mt,amt:d})}});
+          if(idx>=0){var d=(m.postBalances[idx]-m.preBalances[idx]+(idx===0?m.fee:0))/1e9;if(d!==0&&!(hasTok&&Math.abs(d)<0.003))part.push({sym:'SOL',amt:d})}
+          var swap=part.some(function(p){return p.amt>0})&&part.some(function(p){return p.amt<0});
+          part.forEach(function(p){items.push({t:t,amt:p.amt,sym:p.sym,mint:p.mint,chain:'Solana',addr:a,swap:swap,url:'https://solscan.io/tx/'+encodeURIComponent(sig)})});
+        });
+        return symbolize(items,Object.keys(mints));
+      });
+    });
+  }
+  function btcActivity(a){
+    var u=['https://mempool.space/api/address/','https://blockstream.info/api/address/'],i=0;
+    function t(){return tfetch(u[i]+a+'/txs').then(function(r){if(!r.ok)throw new Error('http');return r.json()}).catch(function(e){i++;if(i<u.length)return t();throw e})}
+    return t().then(function(txs){
+      return txs.map(function(x){
+        var out=0,inn=0;
+        x.vout.forEach(function(o){if(o.scriptpubkey_address===a)out+=o.value});
+        x.vin.forEach(function(v){if(v.prevout&&v.prevout.scriptpubkey_address===a)inn+=v.prevout.value});
+        return{t:(x.status&&x.status.block_time)?x.status.block_time*1000:Date.now(),amt:(out-inn)/1e8,sym:'BTC',chain:'Bitcoin',addr:a,url:'https://mempool.space/tx/'+encodeURIComponent(x.txid)};
+      }).filter(function(x){return x.amt!==0});
+    });
+  }
+  function ethActivity(a){
+    var base='https://eth.blockscout.com/api/v2/addresses/'+a,lo=a.toLowerCase(),items=[],fails=0;
+    function sign(f,t,v){var fr=((f&&f.hash)||'').toLowerCase(),to=((t&&t.hash)||'').toLowerCase();return fr===lo?-v:(to===lo?v:0)}
+    function get(path){return tfetch(base+path).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).catch(function(){fails++;return{}})}
+    return Promise.all([get('/transactions'),get('/token-transfers')]).then(function(res){
+      (res[0].items||[]).forEach(function(x){
+        var v=Number(x.value)/1e18;if(!(v>0)||(x.result&&x.result!=='success'))return;
+        var amt=sign(x.from,x.to,v);if(!amt)return;
+        items.push({t:Date.parse(x.timestamp)||0,amt:amt,sym:'ETH',chain:'Ethereum',addr:a,url:'https://etherscan.io/tx/'+encodeURIComponent(x.hash)});
+      });
+      (res[1].items||[]).forEach(function(x){
+        var tk=x.token||{};if(tk.type&&tk.type!=='ERC-20')return;
+        var dec=Number((x.total&&x.total.decimals)||tk.decimals||18),v=Number(x.total&&x.total.value)/Math.pow(10,dec);
+        if(!(v>0))return;
+        var amt=sign(x.from,x.to,v);if(!amt)return;
+        items.push({t:Date.parse(x.timestamp)||0,amt:amt,sym:String(tk.symbol||'?').slice(0,12),chain:'Ethereum',addr:a,url:'https://etherscan.io/tx/'+encodeURIComponent(x.transaction_hash||x.tx_hash||'')});
+      });
+      if(fails>=2)throw new Error('eth');
+      return items;
+    });
+  }
+  function fmtDate(t){return t?new Date(t).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'Pending'}
+  function renderActivity(){
+    var box=$('#actList'),list=addrs(),sum=$('#actSummary'),sub=$('#actSub'),st=$('#actStatus'),more=$('#actMore');
+    box.textContent='';
+    if(!list.length){box.appendChild(el('div','empty','Add a public wallet address to see your transactions here.'));sum.textContent='—';sub.textContent='No wallet connected';st.textContent='';more.classList.add('hidden');return}
+    if(actLoading){box.appendChild(el('p','note','Loading transactions…'));sum.textContent='…';sub.textContent='Loading';st.textContent='';more.classList.add('hidden');return}
+    if(!ACT.length)box.appendChild(el('div','empty',actFailed?'Couldn’t load transactions right now. Tap Refresh to try again.':'No transactions found for your saved addresses yet.'));
+    ACT.slice(0,actShown).forEach(function(x){
+      var inn=x.amt>0,row=el('div','asset'),ic=el('span','ab',inn?'↙':'↗'),info=el('div','info'),pr=el('div','price');
+      row.style.setProperty('--c',inn?'#34d399':'#f9a8d4');row.style.cursor='pointer';
+      info.appendChild(el('b',null,(x.swap?'Swap · ':'')+(inn?'Received ':'Sent ')+x.sym));info.appendChild(document.createElement('br'));
+      info.appendChild(el('small',null,fmtDate(x.t)+' · '+x.chain+' · '+short(x.addr)));
+      var ab=Math.abs(x.amt),am=el('b',null,(inn?'+':'−')+nf(ab,ab<1?6:2));am.style.color=inn?'var(--up)':'var(--down)';
+      pr.appendChild(am);pr.appendChild(el('small',null,x.sym));
+      row.appendChild(ic);row.appendChild(info);row.appendChild(pr);
+      row.addEventListener('click',function(){window.open(x.url,'_blank','noopener')});
+      box.appendChild(row);
+    });
+    sum.textContent=String(ACT.length);sub.textContent=ACT.length?'recent transactions':(actFailed?'Couldn’t load':'Nothing yet');
+    more.classList.toggle('hidden',ACT.length<=actShown);
+    st.textContent=actFailed?actFailed+' address'+(actFailed>1?'es':'')+' couldn’t be checked. Tap Refresh to retry.':(ACT.length?'Showing '+Math.min(actShown,ACT.length)+' of '+ACT.length+' recent transactions from your saved addresses.':'');
+  }
+  function loadActivity(){
+    var list=addrs();
+    if(!list.length){ACT=[];actFailed=0;actLoading=false;renderActivity();return}
+    actLoading=true;actFailed=0;renderActivity();
+    Promise.all(list.map(function(a){
+      var k=kindOf(a),p=k==='sol'?solActivity(a):k==='btc'?btcActivity(a):k==='evm'?ethActivity(a):Promise.resolve([]);
+      return p.catch(function(){actFailed++;return[]});
+    })).then(function(all){
+      ACT=[].concat.apply([],all).sort(function(a,b){return b.t-a.t});
+      actLoading=false;renderActivity();
+    });
+  }
+  $('#refreshAct').addEventListener('click',function(){actShown=20;loadActivity()});
+  $('#actMore').addEventListener('click',function(){actShown+=20;renderActivity()});
+
+  renderHoldings();load();loadHoldings();setInterval(load,60000);
+
+  /* NGN P2P */
+  function nf(v,d){return v==null?'—':v.toLocaleString(undefined,{maximumFractionDigits:d===undefined?2:d})}
+  function loadP2P(){
+    var asset=$('#p2pAsset').value,side=$('#p2pSide').value.indexOf('Buy')===0?'BUY':'SELL',out=$('#p2pOut'),st=$('#p2pStatus');
+    st.textContent='Checking OKX, Bybit and Bitget…';out.textContent='';
+    var ref=(asset==='USDT'&&data&&data.tether&&data.tether.ngn)?' Market reference: ₦'+nf(data.tether.ngn)+' per USDT.':'';
+    tfetch('/api/p2p?asset='+asset+'&side='+side).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
+      var best=null,bestName='',cards=[];
+      j.providers.forEach(function(p){
+        var card=el('div','card pcard'),hd=el('div','xrow');
+        hd.appendChild(xlogo(p.name,p.name.charAt(0)));hd.appendChild(el('b',null,p.name));
+        card.appendChild(hd);
+        if(!p.ok)card.appendChild(el('p','note','Unavailable right now.'));
+        else p.offers.forEach(function(o,i){
+          if(i===0&&(best===null||(side==='BUY'?o.price<best:o.price>best))){best=o.price;bestName=p.name}
+          var row=el('div','offer'),pr=el('div','op');
+          pr.appendChild(el('b',null,'₦'+nf(o.price,o.price<1000?2:0)));
+          pr.appendChild(el('small',null,' per '+asset));
+          row.appendChild(pr);
+          row.appendChild(el('span','mer',o.merchant||'Merchant'));
+          row.appendChild(el('small','lim',o.min!=null?'Limits ₦'+nf(o.min,0)+' to ₦'+nf(o.max,0):'Limits not shown'));
+          card.appendChild(row);
+        });
+        cards.push(card);
+      });
+      if(best!==null){
+        var bn=el('div','best');
+        bn.appendChild(el('small',null,'Best price to '+(side==='BUY'?'buy':'sell')));
+        bn.appendChild(el('b',null,'₦'+nf(best,best<1000?2:0)));
+        bn.appendChild(el('small',null,'on '+bestName+' · per '+asset));
+        out.appendChild(bn);
+      }
+      cards.forEach(function(c){out.appendChild(c)});
+      st.textContent=(best!==null?'':'No offers could be loaded right now.')+ref+' Updated '+new Date().toLocaleTimeString()+'. Confirm the price in the exchange app before you trade.';
+    }).catch(function(){
+      var n=data?(asset==='BTC'?(data.bitcoin&&data.bitcoin.ngn):(data.tether&&data.tether.ngn)):null;
+      st.textContent='Live P2P offers aren’t switched on for this site. '+(n?'Market reference: about ₦'+nf(n,n<1000?2:0)+' per '+asset+'. ':'')+'Use the links below to see current offers.';
+    });
+  }
+  $('#refreshP2P').addEventListener('click',loadP2P);
+  $('#p2pAsset').addEventListener('change',function(){$('#p2pOut').textContent=''});
+  $('#p2pSide').addEventListener('change',function(){$('#p2pOut').textContent=''});
+  /* exchange logos (each exchange's own icon, with a letter badge if it can't load) */
+  var XD={OKX:'okx.com',Bybit:'bybit.com',Bitget:'bitget.com'},XC={OKX:294,Bybit:521,Bitget:513};
+  function xsrcs(k){
+    var d=XD[k]||'',l=[];
+    l.push('https://www.google.com/s2/favicons?domain='+d+'&sz=128');
+    l.push('https://icons.duckduckgo.com/ip3/'+d+'.ico');
+    l.push('https://www.'+d+'/favicon.ico');
+    if(XC[k])l.push('https://s2.coinmarketcap.com/static/img/exchanges/128x128/'+XC[k]+'.png');
+    return l;
+  }
+  function xfb(img){var f=el('span','xl xl-fb',img.dataset.fb||'?');if(img.classList.contains('xs'))f.classList.add('xs');img.replaceWith(f)}
+  function xnext(img){var l=xsrcs(img.dataset.k),i=(+img.dataset.i||0)+1;if(i<l.length){img.dataset.i=i;img.src=l[i]}else xfb(img)}
+  function xfix(img){img.dataset.i=img.dataset.i||0;img.addEventListener('error',function(){xnext(img)});if(img.complete&&img.naturalWidth===0)xnext(img)}
+  function xlogo(k,letter,cls){var i=new Image(32,32);i.className='xl'+(cls?' '+cls:'');i.alt='';i.dataset.k=k;i.dataset.fb=letter||'?';i.src=xsrcs(k)[0];xfix(i);return i}
+  $$('img.xl').forEach(xfix);
+
+})();
+</script>
+</body>
+</html>
