@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="DeepDimples Bank personal crypto and finance dashboard">
+<title>DeepDimples Bank</title>
+<style>
+:root{--bg:#000;--card:#111114;--line:#26262c;--text:#f4f2f3;--mute:#9a97a0;--accent:#e0457b;--up:#34d399;--down:#ff6b6b;color-scheme:dark}
+:root[data-theme=light]{--bg:#faf7f8;--card:#fff;--line:#e6e0e3;--text:#17121a;--mute:#6f6873;--accent:#c42a62;--up:#0f9d6b;--down:#d63b3b;color-scheme:light}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-top:env(safe-area-inset-top,0px)}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hidden{display:none!important}
+.app{max-width:560px;margin:0 auto;padding:12px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0 14px}
+.profile{display:flex;align-items:center;gap:10px;text-align:left}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;overflow:hidden;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.profile strong{display:block;line-height:1.2}
+.profile span{font-size:12px;color:var(--mute)}
+.top-actions{display:flex;gap:6px}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);font-size:18px}
+.search{margin-bottom:12px}
+.search input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+h1{font-size:30px;line-height:1.1;letter-spacing:-.02em}
+h2{font-size:20px;letter-spacing:-.01em}
+h3{font-size:17px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 0 16px}
+.hero p{font-size:13px;color:var(--mute);margin-bottom:2px}
+.pill{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;color:var(--mute)}
+.pill i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--up);margin-right:6px}
+.wallet{background:linear-gradient(150deg,#2a0f1c,#14090f 60%,#0a0a0c);border:1px solid #3a1727;border-radius:22px;padding:20px;color:#f6eef2}
+:root[data-theme=light] .wallet{background:linear-gradient(150deg,#ffe3ee,#fff1f6);border-color:#f3c9d8;color:#2a0f1c}
+.wallet-top{display:flex;justify-content:space-between;font-size:14px;opacity:.8}
+.wallet-value{font-size:30px;font-weight:700;margin:10px 0 4px;word-break:break-all}
+.wallet-sub{font-size:13px;opacity:.75}
+.wallet-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.wallet-row label{font-size:13px;opacity:.85}
+select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 8px;color:inherit}
+select option{color:#111}
+.btn{border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600}
+.wallet .btn{border-color:rgba(255,255,255,.35);margin-top:14px}
+:root[data-theme=light] .wallet .btn{border-color:#c42a62}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+.note{font-size:12.5px;color:var(--mute);margin-top:8px}
+.wallet .note{color:inherit;opacity:.7}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left}
+.summary .card strong{display:block;font-size:17px;margin:4px 0}
+.summary small,.summary .t{font-size:12.5px;color:var(--mute)}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px}
+.actions button{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:12px 4px;display:grid;gap:4px;place-items:center;font-size:13px;font-weight:600}
+.actions span{font-size:20px;color:var(--accent)}
+.sec{display:flex;justify-content:space-between;align-items:flex-end;margin:28px 0 12px;scroll-margin-top:16px}
+.sec p{font-size:13px;color:var(--mute)}
+.link{color:var(--accent);font-weight:600;font-size:14px}
+.assets{display:grid;gap:8px}
+.asset{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.asset img{width:36px;height:36px;border-radius:50%;flex:none}
+.asset .info{flex:1;min-width:0}
+.asset .info small{color:var(--mute)}
+.asset .price{text-align:right}
+.asset .price small{display:block;color:var(--mute);font-size:12px}
+.chg{min-width:64px;text-align:right;font-weight:600;font-size:14px;color:var(--mute)}
+.chg.up{color:var(--up)}.chg.down{color:var(--down)}
+.empty{text-align:center;padding:26px 16px;background:var(--card);border:1px dashed var(--line);border-radius:16px}
+.empty b{display:block;margin-bottom:4px}
+.empty p{font-size:14px;color:var(--mute)}
+.p2p .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.p2p .row label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+.p2p select{background:var(--bg);border-color:var(--line);color:var(--text)}
+.p2p select option{color:inherit}
+.prov{display:grid;gap:8px;margin-top:10px}
+.prov a{display:flex;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:12px;color:var(--text);text-decoration:none;font-weight:600}
+.prov a span{color:var(--accent)}
+.services{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.services .card{display:grid;gap:2px}
+.services .card span{font-size:20px;color:var(--accent)}
+.services .card small{color:var(--mute);font-size:12.5px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{display:grid;place-items:center;gap:0;font-size:11px;color:var(--mute);padding:4px 10px}
+nav button span{font-size:19px}
+nav button.on{color:var(--accent)}
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--text);padding:20px;width:min(92vw,420px)}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog form{display:grid;gap:8px}
+dialog label{font-size:13px;color:var(--mute)}
+dialog input{padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+.dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;max-width:88vw;opacity:0;pointer-events:none;transition:.2s;z-index:10;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button class="profile" id="editProfile" aria-label="Edit profile">
+      <div class="avatar" id="avatar">DD</div>
+      <div><strong id="profileName">DeepDimples</strong><span>Personal workspace · Edit profile</span></div>
+    </button>
+    <div class="top-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="Search">⌕</button>
+      <button class="icon-btn" id="notify" aria-label="Notifications">♧</button>
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle light mode">☼</button>
+    </div>
+  </header>
+
+  <div class="search hidden" id="searchWrap"><input id="searchInput" type="search" placeholder="Search assets…" aria-label="Search assets"></div>
+
+  <section class="hero">
+    <div><p>Your financial space</p><h1>DeepDimples Bank</h1></div>
+    <span class="pill"><i></i>Private</span>
+  </section>
+
+  <section class="wallet" id="home">
+    <div class="wallet-top"><span>Wallet overview</span><button id="hideBalance" aria-label="Hide balance">◉</button></div>
+    <div class="wallet-value" id="walletValue">Not connected</div>
+    <div class="wallet-sub" id="walletSub">No wallet connected</div>
+    <div class="wallet-row">
+      <label for="currency">Display
+        <select id="currency">
+          <option>USD</option><option>EUR</option><option>GBP</option><option>NGN</option><option>BTC</option>
+        </select>
+      </label>
+    </div>
+    <button class="btn" id="watchWallet">＋ Add public wallet address</button>
+    <p class="note">Watch-only. Nothing here can sign or send.</p>
+  </section>
+
+  <section class="summary">
+    <button class="card" data-go="activity"><span class="t">Activity</span><strong>—</strong><small>No verified account data</small></button>
+    <button class="card" data-go="markets"><span class="t">Market watch</span><strong id="marketSummary">Loading…</strong><small id="marketFresh">Fetching prices</small></button>
+  </section>
+
+  <section class="actions" aria-label="Quick actions">
+    <button data-note="Connect a wallet first. No transfer has been started."><span>↗</span>Send</button>
+    <button data-note="Choose a wallet and network before creating a receive address."><span>⌁</span>Receive</button>
+    <button data-note="Cash-outs happen through your exchange or P2P provider. Nothing was started."><span>⇄</span>Cash out</button>
+    <button data-note="No debit card is connected or issued here."><span>▤</span>Cards</button>
+  </section>
+
+  <div class="sec" id="markets"><div><p>Market watch</p><h2>Crypto assets</h2></div><button class="link" id="refreshPrices">Refresh ↻</button></div>
+  <section class="assets" id="assetList">
+    <div class="asset" data-s="bitcoin btc" data-id="bitcoin"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/btc.png" alt="Bitcoin logo"><div class="info"><b>Bitcoin</b><br><small>BTC</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+    <div class="asset" data-s="ethereum eth" data-id="ethereum"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/eth.png" alt="Ethereum logo"><div class="info"><b>Ethereum</b><br><small>ETH</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+    <div class="asset" data-s="solana sol" data-id="solana"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/sol.png" alt="Solana logo"><div class="info"><b>Solana</b><br><small>SOL</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+    <div class="asset" data-s="tether usdt" data-id="tether"><img src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/usdt.png" alt="Tether logo"><div class="info"><b>Tether</b><br><small>USDT</small></div><div class="price"><b>—</b><small>Waiting for data</small></div><span class="chg">—</span></div>
+  </section>
+  <p class="note" id="priceStatus">Prices load from CoinGecko. They are indicative market data, not executable quotes.</p>
+
+  <div class="sec" id="activity"><div><p>Your money moves</p><h2>Recent activity</h2></div></div>
+  <div class="empty"><b>No connected activity</b><p>Connect a wallet or supported account to see verified transactions here.</p></div>
+
+  <div class="sec" id="p2p"><div><p>Nigeria market</p><h2>NGN P2P rates</h2></div></div>
+  <section class="card p2p">
+    <b>Compare Nigerian P2P providers</b>
+    <p class="note">In-dashboard rates aren’t connected yet. These links open each marketplace.</p>
+    <div class="row">
+      <label>Asset<select id="p2pAsset"><option>USDT</option><option>USDC</option><option>BTC</option></select></label>
+      <label>I’m looking to<select id="p2pSide"><option>Buy crypto</option><option>Sell crypto</option></select></label>
+    </div>
+    <div class="prov">
+      <a href="https://www.okx.com/p2p-markets" target="_blank" rel="noopener noreferrer">OKX P2P <span>Open</span></a>
+      <a href="https://www.bybit.com/fiat/trade/otc" target="_blank" rel="noopener noreferrer">Bybit P2P <span>Open</span></a>
+      <a href="https://www.bitget.com/p2p-trade" target="_blank" rel="noopener noreferrer">Bitget P2P <span>Open</span></a>
+    </div>
+    <button class="link" id="p2pInfo" style="margin-top:12px">How to use P2P safely</button>
+  </section>
+
+  <div class="sec" id="services"><div><p>Your services</p><h2>Manage your money</h2></div></div>
+  <section class="card">
+    <h3>Exchange connections</h3>
+    <p class="note">Read-only connections come first. None are connected yet.</p>
+  </section>
+  <section class="services">
+    <button class="card" data-note="Wallet connection isn’t active yet. Add a public address above to watch one."><span>◈</span><b>Wallets</b><small>Connect and view assets</small></button>
+    <button class="card" data-note="This dashboard doesn’t issue debit cards."><span>▤</span><b>Debit cards</b><small>Provider needed</small></button>
+    <button class="card" data-note="Conversion will be added once a provider is chosen."><span>⇄</span><b>Convert</b><small>Not connected</small></button>
+    <button class="card" data-note="Live chat and voice aren’t connected."><span>◌</span><b>Help &amp; chat</b><small>Later phase</small></button>
+  </section>
+</div>
+
+<nav aria-label="Main navigation">
+  <button class="on" data-go="home"><span>▣</span>Home</button>
+  <button data-go="markets"><span>▥</span>Markets</button>
+  <button data-go="activity"><span>⇄</span>Activity</button>
+  <button data-go="services"><span>▦</span>Services</button>
+  <button id="navProfile"><span>⚙</span>Settings</button>
+</nav>
+
+<dialog id="profileDialog">
+  <form method="dialog" id="profileForm">
+    <h2>Edit profile</h2>
+    <label for="nick">Nickname</label>
+    <input id="nick" maxlength="32" placeholder="Your nickname">
+    <label for="avatarUrl">Profile image URL (optional)</label>
+    <input id="avatarUrl" type="url" placeholder="https://…">
+    <div class="dlg-actions"><button type="button" class="btn" id="cancelProfile">Cancel</button><button type="submit" class="btn solid">Save profile</button></div>
+    <p class="note">Saved only in this browser on this device.</p>
+  </form>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var store={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+  /* toast */
+  var tt;function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show')},2800)}
+  $$('[data-note]').forEach(function(b){b.addEventListener('click',function(){toast(b.dataset.note)})});
+  $('#notify').addEventListener('click',function(){toast('No notifications yet.')});
+  $('#p2pInfo').addEventListener('click',function(){toast('Trade only with verified merchants, pay from your own account, and release crypto only after the money lands.')});
+
+  /* theme */
+  function setTheme(t){document.documentElement.dataset.theme=t;store.set('dd-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='light'?'#faf7f8':'#000000'}
+  setTheme(store.get('dd-theme')||'dark');
+  $('#themeToggle').addEventListener('click',function(){setTheme(document.documentElement.dataset.theme==='light'?'dark':'light')});
+
+  /* search */
+  $('#searchToggle').addEventListener('click',function(){var w=$('#searchWrap');w.classList.toggle('hidden');if(!w.classList.contains('hidden'))$('#searchInput').focus()});
+  $('#searchInput').addEventListener('input',function(e){var q=e.target.value.trim().toLowerCase();$$('.asset').forEach(function(r){r.classList.toggle('hidden',q&&r.dataset.s.indexOf(q)<0)})});
+
+  /* profile */
+  function applyProfile(){
+    var n=store.get('dd-nick')||'DeepDimples',u=store.get('dd-avatar')||'',a=$('#avatar');
+    $('#profileName').textContent=n;
+    a.textContent='';
+    if(u){var i=new Image();i.alt='';i.onerror=function(){a.textContent=n.slice(0,2).toUpperCase()};i.src=u;a.appendChild(i)}else{a.textContent=n.slice(0,2).toUpperCase()}
+  }
+  applyProfile();
+  var dlg=$('#profileDialog');
+  function openProfile(){$('#nick').value=store.get('dd-nick')||'';$('#avatarUrl').value=store.get('dd-avatar')||'';dlg.showModal()}
+  $('#editProfile').addEventListener('click',openProfile);
+  $('#navProfile').addEventListener('click',openProfile);
+  $('#cancelProfile').addEventListener('click',function(){dlg.close()});
+  $('#profileForm').addEventListener('submit',function(){
+    var n=$('#nick').value.trim(),u=$('#avatarUrl').value.trim();
+    store.set('dd-nick',n);store.set('dd-avatar',u);applyProfile();toast('Profile saved.')
+  });
+
+  /* nav */
+  $$('[data-go]').forEach(function(b){b.addEventListener('click',function(){
+    var el=document.getElementById(b.dataset.go);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    if(b.closest('nav')){$$('nav button').forEach(function(x){x.classList.remove('on')});b.classList.add('on')}
+  })});
+
+  /* wallet (watch-only address, saved locally) */
+  var hidden=false;
+  function walletRender(){
+    var addr=store.get('dd-wallet');
+    $('#walletValue').textContent=hidden?'••••••':(addr?'Watching 1 address':'Not connected');
+    $('#walletSub').textContent=addr?(addr.slice(0,6)+'…'+addr.slice(-4)+' · balances arrive in the next update'):'No wallet connected';
+  }
+  walletRender();
+  $('#hideBalance').addEventListener('click',function(){hidden=!hidden;walletRender()});
+  $('#watchWallet').addEventListener('click',function(){
+    var a=prompt('Paste a public wallet address (never a secret phrase or private key):');
+    if(a===null)return;a=a.trim();
+    if(a.length<20||/\s/.test(a)){toast('That doesn’t look like a public address.');return}
+    store.set('dd-wallet',a);walletRender();toast('Address saved for watching.')
+  });
+
+  /* live prices */
+  var ids=['bitcoin','ethereum','solana','tether'],data=null;
+  var API='https://api.coingecko.com/api/v3/simple/price?ids='+ids.join(',')+'&vs_currencies=usd,eur,gbp,ngn&include_24hr_change=true';
+  function conv(id){
+    var c=$('#currency').value;
+    if(c==='BTC')return{v:data[id].usd/data.bitcoin.usd,c:'BTC'};
+    return{v:data[id][c.toLowerCase()],c:c};
+  }
+  function fmt(o){
+    if(o.c==='BTC')return o.v.toFixed(o.v<0.001?8:6)+' BTC';
+    return o.v.toLocaleString(undefined,{style:'currency',currency:o.c,maximumFractionDigits:o.v<1?4:2});
+  }
+  function render(){
+    if(!data)return;
+    $$('.asset').forEach(function(r){
+      var d=data[r.dataset.id];if(!d)return;
+      r.querySelector('.price b').textContent=fmt(conv(r.dataset.id));
+      r.querySelector('.price small').textContent='Live price';
+      var ch=d.usd_24h_change,b=r.querySelector('.chg');
+      if(typeof ch==='number'){b.textContent=(ch>=0?'+':'')+ch.toFixed(2)+'%';b.className='chg '+(ch>=0?'up':'down')}
+    });
+    var t=new Date().toLocaleTimeString();
+    $('#marketSummary').textContent='BTC '+fmt(conv('bitcoin'));
+    $('#marketFresh').textContent='Updated '+t;
+    $('#priceStatus').textContent='Prices from CoinGecko, updated '+t+'. Indicative market data, not executable quotes.';
+  }
+  function load(){
+    fetch(API).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){data=j;render()}).catch(function(){
+      $('#marketFresh').textContent='Feed unavailable';
+      $('#priceStatus').textContent='Couldn’t load prices. Wait a minute, then tap Refresh.';
+    });
+  }
+  $('#refreshPrices').addEventListener('click',function(){load();toast('Refreshing prices…')});
+  $('#currency').addEventListener('change',render);
+  load();setInterval(load,60000);
+})();
+</script>
+</body>
+</html>
